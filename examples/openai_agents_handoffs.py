@@ -66,10 +66,6 @@ triage_agent = Agent(
 
 async def main():
     result = await Runner.run(triage_agent, input="Hola, ¿cómo estás? ¿Puedes darme el clima para San Francisco CA?")
-    gz_source = draw_graph(triage_agent, filename="openai_agents_handoffs.png")
-    # save graph to file in graphviz format
-    gz_source.save("openai_agents_handoffs.dot")
-
     print(result.final_output)
 
 

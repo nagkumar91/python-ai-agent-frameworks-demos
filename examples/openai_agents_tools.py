@@ -22,7 +22,7 @@ load_dotenv(override=True)
 API_HOST = os.getenv("API_HOST", "github")
 if API_HOST == "github":
     client = openai.AsyncOpenAI(base_url="https://models.inference.ai.azure.com", api_key=os.environ["GITHUB_TOKEN"])
-    MODEL_NAME = os.getenv("GITHUB_MODEL", "gpt-4o")
+    MODEL_NAME = "Mistral-Large-2411"
 elif API_HOST == "azure":
     token_provider = azure.identity.get_bearer_token_provider(azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
     client = openai.AsyncAzureOpenAI(
@@ -62,6 +62,7 @@ def get_activities(city: str, date: str) -> list:
 
 @function_tool
 def get_current_date() -> str:
+    """Gets the current date and returns as a string in format YYYY-MM-DD."""
     logger.info("Getting current date")
     return datetime.now().strftime("%Y-%m-%d")
 
