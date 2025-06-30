@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from rich.logging import RichHandler
 
 # Setup logging with rich
-logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
+logging.basicConfig(level=logging.WARNING, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger("weekend_planner")
 
 # Disable tracing since we're not connected to a supported tracing provider

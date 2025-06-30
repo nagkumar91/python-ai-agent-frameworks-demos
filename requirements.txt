@@ -19,3 +19,4 @@ llama-index-llms-azure-openai
 llama-index-llms-openai-like
 llama-index-embeddings-azure-openai
 smolagents
+playwright
