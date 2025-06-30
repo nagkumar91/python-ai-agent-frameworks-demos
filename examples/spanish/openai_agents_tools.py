@@ -10,14 +10,14 @@ from agents import Agent, OpenAIChatCompletionsModel, Runner, function_tool, set
 from dotenv import load_dotenv
 from rich.logging import RichHandler
 
-# Setup logging with rich
-logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
+# Configuración de logging con rich
+logging.basicConfig(level=logging.WARNING, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger("weekend_planner")
 
-# Disable tracing since we're not connected to a supported tracing provider
+# Desactivamos el rastreo ya que no estamos conectados a un proveedor compatible
 set_tracing_disabled(disabled=True)
 
-# Setup the OpenAI client to use either Azure OpenAI or GitHub Models
+# Configuramos el cliente OpenAI para usar Azure OpenAI o Modelos de GitHub
 load_dotenv(override=True)
 API_HOST = os.getenv("API_HOST", "github")
 if API_HOST == "github":
@@ -31,56 +31,51 @@ elif API_HOST == "azure":
         azure_ad_token_provider=token_provider,
     )
     MODEL_NAME = os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"]
-elif API_HOST == "ollama":
-    client = openai.AsyncOpenAI(base_url="http://localhost:11434/v1", api_key="none")
-    MODEL_NAME = "llama3.1:latest"
 
 
 @function_tool
 def get_weather(city: str) -> str:
-    logger.info(f"Getting weather for {city}")
+    logger.info(f"Obteniendo el clima para {city}")
     if random.random() < 0.05:
         return {
             "city": city,
             "temperature": 72,
-            "description": "Sunny",
+            "description": "Soleado",
         }
     else:
         return {
             "city": city,
             "temperature": 60,
-            "description": "Rainy",
+            "description": "Lluvioso",
         }
 
 
 @function_tool
 def get_activities(city: str, date: str) -> list:
-    logger.info(f"Getting activities for {city} on {date}")
+    logger.info(f"Obteniendo actividades para {city} el {date}")
     return [
-        {"name": "Hiking", "location": city},
-        {"name": "Beach", "location": city},
-        {"name": "Museum", "location": city},
+        {"name": "Senderismo", "location": city},
+        {"name": "Playa", "location": city},
+        {"name": "Museo", "location": city},
     ]
 
 
 @function_tool
 def get_current_date() -> str:
-    """Gets the current date and returns as a string in format YYYY-MM-DD."""
-    logger.info("Getting current date")
+    logger.info("Obteniendo fecha actual")
     return datetime.now().strftime("%Y-%m-%d")
 
 
 agent = Agent(
-    name="Weekend Planner",
-    instructions="Your job is to report the weather.",
-    tools=[get_weather],
-    tool_use_behavior="stop_on_first_tool",
+    name="Planificador de Finde",
+    instructions="Ayudas a los usuarios a planificar sus fines de semana y elegir las mejores actividades según el clima. Si una actividad sería desagradable con el clima actual, no la sugieras. Incluye la fecha del fin de semana en tu respuesta.",
+    tools=[get_weather, get_activities, get_current_date],
     model=OpenAIChatCompletionsModel(model=MODEL_NAME, openai_client=client),
 )
 
 
 async def main():
-    result = await Runner.run(agent, input="hii whats weather in seattle?")
+    result = await Runner.run(agent, input="hola ¿qué puedo hacer este fin de semana en Quito?")
     print(result.final_output)
 
 

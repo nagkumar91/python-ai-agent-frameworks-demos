@@ -14,28 +14,28 @@ from langgraph.prebuilt import ToolNode
 
 @tool
 def play_song_on_spotify(song: str):
-    """Play a song on Spotify"""
-    # Call the spotify API ...
-    return f"Successfully played {song} on Spotify!"
+    """Reproducir una canción en Spotify"""
+    # Acá llamarías a la API de Spotify...
+    return f"¡Listo! Ya puse {song} en Spotify."
 
 
 @tool
 def play_song_on_apple(song: str):
-    """Play a song on Apple Music"""
-    # Call the apple music API ...
-    return f"Successfully played {song} on Apple Music!"
+    """Reproducir una canción en Apple Music"""
+    # Acá llamarías a la API de Apple Music...
+    return f"¡Listo! Ya puse {song} en Apple Music."
 
 
 tools = [play_song_on_apple, play_song_on_spotify]
 tool_node = ToolNode(tools)
 
-# Setup the client to use either Azure OpenAI or GitHub Models
+# Configurar el cliente para usar Azure OpenAI o modelos de GitHub
 load_dotenv(override=True)
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "azure":
     token_provider = azure.identity.get_bearer_token_provider(azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
-    llm = AzureChatOpenAI(
+    model = AzureChatOpenAI(
         azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
         azure_deployment=os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"],
         openai_api_version=os.environ["AZURE_OPENAI_VERSION"],
@@ -46,77 +46,77 @@ else:
 
 model = model.bind_tools(tools, parallel_tool_calls=False)
 
-# Define nodes and conditional edges
+# Definir nodos y conexiones condicionales
 
 
-# Define the function that determines whether to continue or not
+# Definir la función que decide si continuar o no
 def should_continue(state):
     messages = state["messages"]
     last_message = messages[-1]
-    # If there is no function call, then we finish
+    # Si no hay una llamada a función, terminamos
     if not last_message.tool_calls:
         return "end"
-    # Otherwise if there is, we continue
+    # Si hay llamada a función, seguimos
     else:
         return "continue"
 
 
-# Define the function that calls the model
+# Definir la función que llama al modelo
 def call_model(state):
     messages = state["messages"]
     response = model.invoke(messages)
-    # We return a list, because this will get added to the existing list
+    # Devolvemos una lista porque esto se agregará a la lista existente
     return {"messages": [response]}
 
 
-# Define a new graph
+# Definir un nuevo grafo
 workflow = StateGraph(MessagesState)
 
-# Define the two nodes we will cycle between
+# Definir los dos nodos entre los que vamos a alternar
 workflow.add_node("agent", call_model)
 workflow.add_node("action", tool_node)
 
-# Set the entrypoint as `agent`
-# This means that this node is the first one called
+# Establecer el punto de entrada como `agent`
+# Esto significa que este nodo es el primero que se llama
 workflow.add_edge(START, "agent")
 
-# We now add a conditional edge
+# Ahora agregamos una conexión condicional
 workflow.add_conditional_edges(
-    # First, we define the start node. We use `agent`.
-    # This means these are the edges taken after the `agent` node is called.
+    # Primero, definimos el nodo inicial. Usamos `agent`.
+    # Esto significa que estas conexiones se toman después de llamar al nodo `agent`.
     "agent",
-    # Next, we pass in the function that will determine which node is called next.
+    # Luego, pasamos la función que determina qué nodo se llama después.
     should_continue,
-    # Finally we pass in a mapping.
-    # The keys are strings, and the values are other nodes.
-    # END is a special node marking that the graph should finish.
-    # What will happen is we will call `should_continue`, and then the output of that
-    # will be matched against the keys in this mapping.
-    # Based on which one it matches, that node will then be called.
+    # Finalmente, pasamos un mapeo.
+    # Las claves son strings, y los valores son otros nodos.
+    # END es un nodo especial que indica que el grafo debe terminar.
+    # Lo que pasa es que llamamos a `should_continue`, y luego el resultado
+    # se compara con las claves de este mapeo.
+    # Según cuál coincida, se llamará a ese nodo.
     {
-        # If `tools`, then we call the tool node.
+        # Si es `continue`, llamamos al nodo de acción.
         "continue": "action",
-        # Otherwise we finish.
+        # Si no, terminamos.
         "end": END,
     },
 )
 
-# We now add a normal edge from `tools` to `agent`.
-# This means that after `tools` is called, `agent` node is called next.
+# Ahora agregamos una conexión normal desde `action` hacia `agent`.
+# Esto significa que después de llamar a `action`, se llama al nodo `agent`.
 workflow.add_edge("action", "agent")
 
-# Set up memory
+# Configurar memoria
 memory = MemorySaver()
 
-# Finally, we compile it!
-# This compiles it into a LangChain Runnable,
-# meaning you can use it as you would any other runnable
+# Finalmente, ¡lo compilamos!
+# Esto lo convierte en un Runnable de LangChain,
+# lo que significa que podés usarlo como cualquier otro runnable.
 
-# We add in `interrupt_before=["action"]`
-# This will add a breakpoint before the `action` node is called
+# Agregamos `interrupt_before=["action"]`
+# Esto agrega un punto de interrupción antes de llamar al nodo `action`
 app = workflow.compile(checkpointer=memory)
 
 config = {"configurable": {"thread_id": "1"}}
-input_message = HumanMessage(content="Can you play Taylor Swift's most popular song?")
+input_message = HumanMessage(content="¿Podés poner la canción más popular de Taylor Swift?")
 for event in app.stream({"messages": [input_message]}, config, stream_mode="values"):
     event["messages"][-1].pretty_print()

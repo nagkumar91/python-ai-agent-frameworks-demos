@@ -7,10 +7,10 @@ from agents import Agent, OpenAIChatCompletionsModel, Runner, function_tool, set
 from agents.extensions.visualization import draw_graph
 from dotenv import load_dotenv
 
-# Disable tracing since we're not using OpenAI.com models
+# Desactivamos el rastreo ya que no estamos usando modelos de OpenAI.com
 set_tracing_disabled(disabled=True)
 
-# Setup the OpenAI client to use either Azure OpenAI or GitHub Models
+# Configuramos el cliente OpenAI para usar Azure OpenAI o Modelos de GitHub
 load_dotenv(override=True)
 API_HOST = os.getenv("API_HOST", "github")
 
@@ -25,9 +25,6 @@ elif API_HOST == "azure":
         azure_ad_token_provider=token_provider,
     )
     MODEL_NAME = os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"]
-elif API_HOST == "ollama":
-    client = openai.AsyncOpenAI(base_url="http://localhost:11434/v1", api_key="none")
-    MODEL_NAME = "llama3.1:latest"
 
 
 @function_tool
@@ -40,35 +37,39 @@ def get_weather(city: str) -> str:
 
 
 agent = Agent(
-    name="Weather agent",
-    instructions="You can only provide weather information.",
+    name="Agente del clima",
+    instructions="Solo puedes proporcionar información del clima.",
     tools=[get_weather],
 )
 
 spanish_agent = Agent(
-    name="Spanish agent",
-    instructions="You only speak Spanish.",
+    name="Agente en español",
+    instructions="Solo hablas español.",
     tools=[get_weather],
     model=OpenAIChatCompletionsModel(model=MODEL_NAME, openai_client=client),
 )
 
 english_agent = Agent(
-    name="English agent",
-    instructions="You only speak English",
+    name="Agente en inglés",
+    instructions="Solo hablas inglés",
     tools=[get_weather],
     model=OpenAIChatCompletionsModel(model=MODEL_NAME, openai_client=client),
 )
 
 triage_agent = Agent(
-    name="Triage agent",
-    instructions="Handoff to the appropriate agent based on the language of the request.",
+    name="Agente de clasificación",
+    instructions="Transfiere al agente apropiado según el idioma de la solicitud.",
     handoffs=[spanish_agent, english_agent],
     model=OpenAIChatCompletionsModel(model=MODEL_NAME, openai_client=client),
 )
 
 
 async def main():
-    result = await Runner.run(triage_agent, input="Hola, ¿cómo estás? ¿Puedes darme el clima para San Francisco CA?")
+    result = await Runner.run(triage_agent, input="Hola, ¿cómo estás? ¿Puedes darme el clima para Cuenca, Ecuador?")
+    gz_source = draw_graph(triage_agent, filename="openai_agents_handoffs.png")
+    # guardamos el grafo en un archivo en formato graphviz
+    gz_source.save("openai_agents_handoffs.dot")
+
     print(result.final_output)
 
 

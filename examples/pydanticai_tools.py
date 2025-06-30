@@ -5,38 +5,35 @@ import random
 from datetime import datetime
 
 import azure.identity
-import openai
-from agents import Agent, OpenAIChatCompletionsModel, Runner, function_tool, set_tracing_disabled
 from dotenv import load_dotenv
+from openai import AsyncAzureOpenAI, AsyncOpenAI
+from pydantic_ai import Agent
+from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.providers.openai import OpenAIProvider
 from rich.logging import RichHandler
 
 # Setup logging with rich
-logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
+logging.basicConfig(level=logging.WARNING, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger("weekend_planner")
 
-# Disable tracing since we're not connected to a supported tracing provider
-set_tracing_disabled(disabled=True)
 
 # Setup the OpenAI client to use either Azure OpenAI or GitHub Models
 load_dotenv(override=True)
 API_HOST = os.getenv("API_HOST", "github")
+
 if API_HOST == "github":
-    client = openai.AsyncOpenAI(base_url="https://models.inference.ai.azure.com", api_key=os.environ["GITHUB_TOKEN"])
-    MODEL_NAME = os.getenv("GITHUB_MODEL", "gpt-4o")
+    client = AsyncOpenAI(api_key=os.environ["GITHUB_TOKEN"], base_url="https://models.inference.ai.azure.com")
+    model = OpenAIModel(os.getenv("GITHUB_MODEL", "gpt-4o"), provider=OpenAIProvider(openai_client=client))
 elif API_HOST == "azure":
     token_provider = azure.identity.get_bearer_token_provider(azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
-    client = openai.AsyncAzureOpenAI(
+    client = AsyncAzureOpenAI(
         api_version=os.environ["AZURE_OPENAI_VERSION"],
         azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
         azure_ad_token_provider=token_provider,
     )
-    MODEL_NAME = os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"]
-elif API_HOST == "ollama":
-    client = openai.AsyncOpenAI(base_url="http://localhost:11434/v1", api_key="none")
-    MODEL_NAME = "llama3.1:latest"
+    model = OpenAIModel(os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"], provider=OpenAIProvider(openai_client=client))
 
 
-@function_tool
 def get_weather(city: str) -> str:
     logger.info(f"Getting weather for {city}")
     if random.random() < 0.05:
@@ -53,7 +50,6 @@ def get_weather(city: str) -> str:
         }
 
 
-@function_tool
 def get_activities(city: str, date: str) -> list:
     logger.info(f"Getting activities for {city} on {date}")
     return [
@@ -62,26 +58,20 @@ def get_activities(city: str, date: str) -> list:
         {"name": "Museum", "location": city},
     ]
 
-
-@function_tool
 def get_current_date() -> str:
-    """Gets the current date and returns as a string in format YYYY-MM-DD."""
     logger.info("Getting current date")
     return datetime.now().strftime("%Y-%m-%d")
 
 
 agent = Agent(
-    name="Weekend Planner",
-    instructions="Your job is to report the weather.",
-    tools=[get_weather],
-    tool_use_behavior="stop_on_first_tool",
-    model=OpenAIChatCompletionsModel(model=MODEL_NAME, openai_client=client),
+    model,
+    system_prompt="You help users plan their weekends and choose the best activities for the given weather. If an activity would be unpleasant in the weather, don't suggest it. Include the date of the weekend in your response.",
+    tools=[get_weather, get_activities, get_current_date],
 )
 
-
 async def main():
-    result = await Runner.run(agent, input="hii whats weather in seattle?")
-    print(result.final_output)
+    result = await agent.run("what can I do for funzies this weekend in Seattle?")
+    print(result.output)
 
 
 if __name__ == "__main__":
