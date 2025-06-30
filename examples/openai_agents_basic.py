@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 
 import azure.identity
@@ -6,6 +7,7 @@ import openai
 from agents import Agent, OpenAIChatCompletionsModel, Runner, set_tracing_disabled
 from dotenv import load_dotenv
 
+logging.basicConfig(level=logging.DEBUG)
 # Disable tracing since we're not connected to a supported tracing provider
 set_tracing_disabled(disabled=True)
 
@@ -23,7 +25,9 @@ elif API_HOST == "azure":
         azure_ad_token_provider=token_provider,
     )
     MODEL_NAME = os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"]
-
+elif API_HOST == "ollama":
+    client = openai.AsyncOpenAI(base_url="http://localhost:11434/v1", api_key="none")
+    MODEL_NAME = "llama3.1:latest"
 
 agent = Agent(
     name="Spanish tutor",

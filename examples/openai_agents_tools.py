@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from rich.logging import RichHandler
 
 # Setup logging with rich
-logging.basicConfig(level=logging.WARNING, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
+logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger("weekend_planner")
 
 # Disable tracing since we're not connected to a supported tracing provider
@@ -31,6 +31,9 @@ elif API_HOST == "azure":
         azure_ad_token_provider=token_provider,
     )
     MODEL_NAME = os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"]
+elif API_HOST == "ollama":
+    client = openai.AsyncOpenAI(base_url="http://localhost:11434/v1", api_key="none")
+    MODEL_NAME = "llama3.1:latest"
 
 
 @function_tool
@@ -68,14 +71,15 @@ def get_current_date() -> str:
 
 agent = Agent(
     name="Weekend Planner",
-    instructions="You help users plan their weekends and choose the best activities for the given weather. If an activity would be unpleasant in the weather, don't suggest it. Include the date of the weekend in your response.",
-    tools=[get_weather, get_activities, get_current_date],
+    instructions="Your job is to report the weather.",
+    tools=[get_weather],
+    tool_use_behavior="stop_on_first_tool",
     model=OpenAIChatCompletionsModel(model=MODEL_NAME, openai_client=client),
 )
 
 
 async def main():
-    result = await Runner.run(agent, input="hii what can I do this weekend in Seattle?")
+    result = await Runner.run(agent, input="hii whats weather in seattle?")
     print(result.final_output)
 
 

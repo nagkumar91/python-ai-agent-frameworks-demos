@@ -13,7 +13,8 @@ if API_HOST == "github":
 elif API_HOST == "azure":
     token_provider = azure.identity.get_bearer_token_provider(azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
     model = AzureOpenAIServerModel(model_id=os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"], api_version=os.environ["AZURE_OPENAI_VERSION"], azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"], client_kwargs={"azure_ad_token_provider": token_provider})
-
+elif API_HOST == "ollama":
+    model = OpenAIServerModel(model_id="llama3.1:latest", api_base="http://localhost:11434/v1", api_key="none")
 
 agent = CodeAgent(tools=[DuckDuckGoSearchTool()], model=model)
 
