@@ -35,7 +35,9 @@ elif API_HOST == "azure":
         azure_ad_token_provider=token_provider,
     )
     model = OpenAIModel(os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"], provider=OpenAIProvider(openai_client=client))
-
+elif API_HOST == "ollama":
+    client = AsyncOpenAI(base_url="http://localhost:11434/v1", api_key="none")
+    model = OpenAIModel("llama3.1:latest", provider=OpenAIProvider(openai_client=client))
 
 """
 Agent definitions

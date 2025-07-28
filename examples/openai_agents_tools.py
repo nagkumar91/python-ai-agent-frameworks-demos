@@ -6,7 +6,7 @@ from datetime import datetime
 
 import azure.identity
 import openai
-from agents import Agent, OpenAIChatCompletionsModel, Runner, function_tool, set_tracing_disabled
+from agents import Agent, Runner, function_tool, set_tracing_disabled
 from dotenv import load_dotenv
 from rich.logging import RichHandler
 
@@ -31,6 +31,9 @@ elif API_HOST == "azure":
         azure_ad_token_provider=token_provider,
     )
     MODEL_NAME = os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"]
+elif API_HOST == "ollama":
+    client = openai.AsyncOpenAI(base_url="http://localhost:11434/v1", api_key="none")
+    MODEL_NAME = "llama3.1:latest"
 
 
 @function_tool
@@ -67,12 +70,7 @@ def get_current_date() -> str:
     return datetime.now().strftime("%Y-%m-%d")
 
 
-agent = Agent(
-    name="Weekend Planner",
-    instructions="You help users plan their weekends and choose the best activities for the given weather. If an activity would be unpleasant in the weather, don't suggest it. Include the date of the weekend in your response.",
-    tools=[get_weather, get_activities, get_current_date],
-    model=OpenAIChatCompletionsModel(model=MODEL_NAME, openai_client=client),
-)
+agent = Agent(name="Weekend Planner", instructions="You help users plan their weekends and choose the best activities for the given weather. If an activity would be unpleasant in the weather, don't suggest it. Include the date of the weekend in your response.", tools=[get_weather, get_activities, get_current_date])
 
 
 async def main():

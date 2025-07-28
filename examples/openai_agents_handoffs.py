@@ -25,6 +25,9 @@ elif API_HOST == "azure":
         azure_ad_token_provider=token_provider,
     )
     MODEL_NAME = os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"]
+elif API_HOST == "ollama":
+    client = openai.AsyncOpenAI(base_url="http://localhost:11434/v1", api_key="none")
+    MODEL_NAME = "llama3.1:latest"
 
 
 @function_tool
