@@ -6,6 +6,7 @@ rich
 azure-ai-inference
 dotenv-azd
 aiohttp
+faker
 autogen-agentchat
 autogen-ext[openai]
 azure-ai-inference==1.0.0b9
@@ -13,10 +14,11 @@ openai-agents
 semantic-kernel
 langgraph
 langchain_openai
-pydantic-ai
+pydantic-ai>=0.4.8
 llama-index
 llama-index-llms-azure-openai
 llama-index-llms-openai-like
 llama-index-embeddings-azure-openai
 smolagents
 playwright
+langchain-mcp-adapters
