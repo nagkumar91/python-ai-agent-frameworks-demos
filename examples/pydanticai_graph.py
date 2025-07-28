@@ -75,7 +75,7 @@ class QuestionState:
 class Ask(BaseNode[QuestionState]):
     async def run(self, ctx: GraphRunContext[QuestionState]) -> Answer:
         result = await ask_agent.run(
-            "Ask a tricky question about Python with a single correct answer.",
+            "Ask a simple question with a single correct answer.",
             message_history=ctx.state.ask_agent_messages,
         )
         ctx.state.ask_agent_messages += result.all_messages()

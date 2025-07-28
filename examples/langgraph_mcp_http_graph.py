@@ -52,7 +52,7 @@ async def setup_agent():
     hotel_response = await graph.ainvoke({"messages": "Find me a hotel in San Francisco for 2 nights starting from 2024-01-01. I need a hotel with free WiFi and a pool."})
     print(hotel_response["messages"][-1].content)
     image_bytes = graph.get_graph().draw_mermaid_png()
-    with open("graph.png", "wb") as f:
+    with open("examples/images/langgraph_mcp_http_graph.png", "wb") as f:
         f.write(image_bytes)
 
 

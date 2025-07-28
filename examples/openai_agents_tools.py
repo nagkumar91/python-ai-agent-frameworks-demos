@@ -6,7 +6,7 @@ from datetime import datetime
 
 import azure.identity
 import openai
-from agents import Agent, OpenAIChatCompletionsModel, Runner, function_tool, set_tracing_disabled
+from agents import Agent, Runner, function_tool, set_tracing_disabled
 from dotenv import load_dotenv
 from rich.logging import RichHandler
 
@@ -70,17 +70,11 @@ def get_current_date() -> str:
     return datetime.now().strftime("%Y-%m-%d")
 
 
-agent = Agent(
-    name="Weekend Planner",
-    instructions="Your job is to report the weather.",
-    tools=[get_weather],
-    tool_use_behavior="stop_on_first_tool",
-    model=OpenAIChatCompletionsModel(model=MODEL_NAME, openai_client=client),
-)
+agent = Agent(name="Weekend Planner", instructions="You help users plan their weekends and choose the best activities for the given weather. If an activity would be unpleasant in the weather, don't suggest it. Include the date of the weekend in your response.", tools=[get_weather, get_activities, get_current_date])
 
 
 async def main():
-    result = await Runner.run(agent, input="hii whats weather in seattle?")
+    result = await Runner.run(agent, input="hii what can I do this weekend in Seattle?")
     print(result.final_output)
 
 
