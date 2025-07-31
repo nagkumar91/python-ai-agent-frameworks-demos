@@ -1,11 +1,11 @@
 import os
 
 import azure.identity
+import rich
 from dotenv import load_dotenv
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langgraph.prebuilt import create_react_agent
-from rich import print
 
 # Setup the client to use either Azure OpenAI or GitHub Models
 load_dotenv(override=True)
@@ -41,8 +41,28 @@ async def setup_agent():
     stale_prompt_path = os.path.join(os.path.dirname(__file__), "staleprompt.md")
     with open(stale_prompt_path) as f:
         stale_prompt = f.read()
+    final_text = ""
     async for event in agent.astream_events({"messages": stale_prompt + " Find one issue from Azure-samples azure-search-openai-demo that is potentially closeable."}, version="v2"):
-        print(event)
+        kind = event["event"]
+        if kind == "on_chat_model_stream":
+            # The event corresponding to a stream of new content (tokens or chunks of text)
+            if chunk := event.get("data", {}).get("chunk"):
+                final_text += chunk.content  # Append the new content to the accumulated text
+
+        elif kind == "on_tool_start":
+            # The event signals that a tool is about to be called
+            rich.print("Called ", event["name"])  # Show which tool is being called
+            rich.print("Tool input: ")
+            rich.print(event["data"].get("input"))  # Display the input data sent to the tool
+
+        elif kind == "on_tool_end":
+            if output := event["data"].get("output"):
+                # The event signals that a tool has finished executing
+                rich.print("Tool output: ")
+                rich.print(output.content)
+
+    rich.print("Final response:")
+    rich.print(final_text)
 
 
 if __name__ == "__main__":
