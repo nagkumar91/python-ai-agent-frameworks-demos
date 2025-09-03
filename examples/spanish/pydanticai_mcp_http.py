@@ -10,7 +10,7 @@ from pydantic_ai.mcp import MCPServerStreamableHTTP
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 
-# Setup the OpenAI client to use either Azure OpenAI or GitHub Models
+# Configuración del cliente OpenAI para usar Azure OpenAI o Modelos de GitHub
 load_dotenv(override=True)
 API_HOST = os.getenv("API_HOST", "github")
 
@@ -29,14 +29,24 @@ elif API_HOST == "ollama":
     client = AsyncOpenAI(base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"), api_key="none")
     model = OpenAIChatModel(os.environ["OLLAMA_MODEL"], provider=OpenAIProvider(openai_client=client))
 
+# URL del servidor MCP que expone herramientas adicionales
 server = MCPServerStreamableHTTP(url="http://localhost:8000/mcp")
 
-agent: Agent[None, str] = Agent(model, system_prompt="You are a travel planning agent. You can help users find hotels.", output_type=str, toolsets=[server])
+agent: Agent[None, str] = Agent(
+    model,
+    system_prompt=("Eres un agente que ayuda a planificar viajes. "
+    "Puedes ayudar a los usuarios a encontrar hoteles."
+),
+    output_type=str,
+    toolsets=[server],
+)
 
 
 async def main():
-    result = await agent.run("Find me a hotel in San Francisco for 2 nights starting from 2024-01-01. I need a hotel with free WiFi and a pool.")
-    print(result.output)
+    consulta = "Encuéntrame un hotel en la Ciudad de México para 3 noches empezando el 2025-10-10. " \
+    "Necesito WiFi gratis y piscina."
+    resultado = await agent.run(consulta)
+    print(resultado.output)
 
 
 if __name__ == "__main__":

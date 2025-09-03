@@ -102,9 +102,11 @@ Podés ejecutar los ejemplos en este repositorio ejecutando los scripts en el di
 | openai_agents_tools.py | Usa el framework de Agentes de OpenAI para crear un planificador de fin de semana. |
 | openai_functioncalling.py | Usa OpenAI Function Calling para llamar funciones basadas en la salida del LLM. |
 | openai_githubmodels.py | Configuración básica para usar modelos de GitHub con la API de OpenAI. |
-| pydanticai_basic.py | Implementación básica usando PydanticAI para crear un agente estructurado. |
-| pydanticai_graph.py | Usa PydanticAI para construir un grafo de agentes para hacer preguntas y evaluar respuestas. |
-| pydanticai_multiagent.py | Usa PydanticAI para construir un flujo de trabajo secuencial de dos agentes para planificación de vuelos. |
+| pydanticai_basic.py | Usa PydanticAI para construir un agente básico (tutor de español). |
+| pydanticai_multiagent.py | Usa PydanticAI para un flujo secuencial de dos agentes (vuelo + selección de asiento). |
+| pydanticai_graph.py | Usa PydanticAI con pydantic-graph para un pequeño grafo de evaluación pregunta/respuesta. |
+| pydanticai_tools.py | Usa PydanticAI con varias herramientas de Python para planificar actividades de fin de semana. |
+| pydanticai_mcp_http.py | Usa PydanticAI con un servidor MCP HTTP como conjunto de herramientas para planificación de viajes (búsqueda de hoteles). |
 | semantickernel_basic.py | Usa Semantic Kernel para construir un agente simple que enseña español. |
 | semantickernel_groupchat.py | Usa Semantic Kernel para construir un flujo de trabajo de dos agentes escritor/editor. |
 | smolagents_codeagent.py | Usa SmolAgents para construir un agente de respuesta a preguntas que puede buscar en la web y ejecutar código. |

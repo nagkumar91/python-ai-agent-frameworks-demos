@@ -12,12 +12,11 @@ from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from rich.logging import RichHandler
 
-# Setup logging with rich
+# Configuración de logging con rich
 logging.basicConfig(level=logging.WARNING, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
-logger = logging.getLogger("weekend_planner")
+logger = logging.getLogger("planificador_fin_de_semana")
 
-
-# Setup the OpenAI client to use either Azure OpenAI or GitHub Models
+# Configuración del cliente OpenAI para usar Azure OpenAI o Modelos de GitHub
 load_dotenv(override=True)
 API_HOST = os.getenv("API_HOST", "github")
 
@@ -37,46 +36,53 @@ elif API_HOST == "ollama":
     model = OpenAIChatModel(os.environ["OLLAMA_MODEL"], provider=OpenAIProvider(openai_client=client))
 
 
-def get_weather(city: str) -> dict:
-    logger.info(f"Getting weather for {city}")
+def obtener_clima(ciudad: str, fecha: str) -> dict:
+    """Devuelve un clima simulado según la ciudad y la fecha proporcionadas."""
+    logger.info(f"Obteniendo clima para {ciudad}")
     if random.random() < 0.05:
         return {
-            "city": city,
-            "temperature": 72,
-            "description": "Sunny",
+            "ciudad": ciudad,
+            "fecha": fecha,
+            "temperatura": 22,
+            "descripcion": "Soleado",
         }
     else:
         return {
-            "city": city,
-            "temperature": 60,
-            "description": "Rainy",
+            "ciudad": ciudad,
+            "fecha": fecha,
+            "temperatura": 16,
+            "descripcion": "Lluvioso",
         }
 
 
-def get_activities(city: str, date: str) -> list:
-    logger.info(f"Getting activities for {city} on {date}")
+def obtener_actividades(ciudad: str, fecha: str) -> list:
+    """Devuelve una lista simulada de actividades disponibles según la ciudad y la fecha proporcionadas."""
+    logger.info(f"Obteniendo actividades para {ciudad} en {fecha}")
     return [
-        {"name": "Hiking", "location": city},
-        {"name": "Beach", "location": city},
-        {"name": "Museum", "location": city},
+        {"nombre": "Senderismo", "lugar": ciudad},
+        {"nombre": "Playa", "lugar": ciudad},
+        {"nombre": "Museo", "lugar": ciudad},
     ]
 
 
-def get_current_date() -> str:
-    logger.info("Getting current date")
+def obtener_fecha_actual() -> str:
+    logger.info("Obteniendo fecha actual")
     return datetime.now().strftime("%Y-%m-%d")
 
 
 agent = Agent(
     model,
-    system_prompt="You help users plan their weekends and choose the best activities for the given weather. If an activity would be unpleasant in the weather, don't suggest it. Include the date of the weekend in your response.",
-    tools=[get_weather, get_activities, get_current_date],
+    system_prompt=("Ayuda al usuario a planificar su fin de semana y a elegir las "
+    "mejores actividades según el clima proporcionado. No sugieras actividades que puedan "
+    "resultar desagradables con ese clima. Incluye la fecha del fin de semana en tu respuesta."),
+    tools=[obtener_clima, obtener_actividades, obtener_fecha_actual],
 )
 
 
 async def main():
-    result = await agent.run("what can I do for funzies this weekend in Seattle?")
-    print(result.output)
+    consulta = "¿Qué puedo hacer este fin de semana en Barcelona para divertirme?"
+    resultado = await agent.run(consulta)
+    print(resultado.output)
 
 
 if __name__ == "__main__":

@@ -98,7 +98,11 @@ You can run the examples in this repository by executing the scripts in the `exa
 | openai_agents_basic.py | Uses the OpenAI Agents framework to build a single agent. |
 | openai_agents.py | Uses the OpenAI Agents framework to handoff between several agents with tools. |
 | openai_functioncalling.py | Uses OpenAI Function Calling to call functions based on LLM output. |
-| pydanticai.py | Uses PydanticAI to build a two-agent sequential workflow for flight planning. |
+| pydanticai_basic.py | Uses PydanticAI to build a basic single agent (Spanish tutor). |
+| pydanticai_multiagent.py | Uses PydanticAI to build a two-agent sequential workflow (flight + seat selection). |
+| pydanticai_graph.py | Uses PydanticAI with pydantic-graph to build a small question/answer evaluation graph. |
+| pydanticai_tools.py | Uses PydanticAI with multiple Python tools for weekend activity planning. |
+| pydanticai_mcp_http.py | Uses PydanticAI with an MCP HTTP server toolset for travel planning (hotel search). |
 | semantickernel.py | Uses Semantic Kernel to build a writer/editor two-agent workflow. |
 | smolagents_codeagent.py | Uses SmolAgents to build a question-answering agent that can search the web and run code. |
 

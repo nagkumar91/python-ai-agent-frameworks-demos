@@ -14,7 +14,7 @@ openai-agents
 semantic-kernel
 langgraph
 langchain_openai
-pydantic-ai>=0.4.8
+pydantic-ai==1.0.0b1
 llama-index
 llama-index-llms-azure-openai
 llama-index-llms-openai-like

@@ -8,7 +8,7 @@ from openai import AsyncAzureOpenAI, AsyncOpenAI
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.messages import ModelMessage
-from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from rich.prompt import Prompt
 
@@ -18,7 +18,7 @@ API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "github":
     client = AsyncOpenAI(api_key=os.environ["GITHUB_TOKEN"], base_url="https://models.inference.ai.azure.com")
-    model = OpenAIModel(os.getenv("GITHUB_MODEL", "gpt-4o"), provider=OpenAIProvider(openai_client=client))
+    model = OpenAIChatModel(os.getenv("GITHUB_MODEL", "gpt-4o"), provider=OpenAIProvider(openai_client=client))
 elif API_HOST == "azure":
     token_provider = azure.identity.get_bearer_token_provider(azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
     client = AsyncAzureOpenAI(
@@ -26,7 +26,10 @@ elif API_HOST == "azure":
         azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
         azure_ad_token_provider=token_provider,
     )
-    model = OpenAIModel(os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"], provider=OpenAIProvider(openai_client=client))
+    model = OpenAIChatModel(os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"], provider=OpenAIProvider(openai_client=client))
+elif API_HOST == "ollama":
+    client = AsyncOpenAI(base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"), api_key="none")
+    model = OpenAIChatModel(os.environ["OLLAMA_MODEL"], provider=OpenAIProvider(openai_client=client))
 
 
 class Flight(BaseModel):
@@ -39,7 +42,7 @@ class Failed(BaseModel):
 
 flight_search_agent = Agent(
     model,
-    result_type=Flight | Failed,
+    output_type=Flight | Failed,
     system_prompt=('Use the "flight_search" tool to find a flight from the given origin to the given destination.'),
 )
 
@@ -58,10 +61,10 @@ async def find_flight() -> Flight | None:
             "Where would you like to fly from and to?",
         )
         result = await flight_search_agent.run(prompt, message_history=message_history)
-        if isinstance(result.data, Flight):
-            return result.data
+        if isinstance(result.output, Flight):
+            return result.output
         else:
-            message_history = result.all_messages(result_tool_return_content="Please try again.")
+            message_history = result.all_messages()
 
 
 class Seat(BaseModel):
@@ -72,7 +75,7 @@ class Seat(BaseModel):
 # This agent is responsible for extracting the user's seat selection
 seat_preference_agent = Agent(
     model,
-    result_type=Seat | Failed,
+    output_type=Seat | Failed,
     system_prompt=("Extract the user's seat preference. " "Seats A and F are window seats. " "Row 1 is the front row and has extra leg room. " "Rows 14, and 20 also have extra leg room. "),
 )
 
@@ -83,8 +86,8 @@ async def find_seat() -> Seat:
         answer = Prompt.ask("What seat would you like?")
 
         result = await seat_preference_agent.run(answer, message_history=message_history)
-        if isinstance(result.data, Seat):
-            return result.data
+        if isinstance(result.output, Seat):
+            return result.output
         else:
             print("Could not understand seat preference. Please try again.")
             message_history = result.all_messages()
