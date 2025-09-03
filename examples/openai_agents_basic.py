@@ -26,8 +26,8 @@ elif API_HOST == "azure":
     )
     MODEL_NAME = os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"]
 elif API_HOST == "ollama":
-    client = openai.AsyncOpenAI(base_url="http://localhost:11434/v1", api_key="none")
-    MODEL_NAME = "llama3.1:latest"
+    client = openai.AsyncOpenAI(base_url=os.environ["OLLAMA_ENDPOINT"], api_key="none")
+    MODEL_NAME = os.environ["OLLAMA_MODEL"]
 
 agent = Agent(
     name="Spanish tutor",

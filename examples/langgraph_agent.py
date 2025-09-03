@@ -41,8 +41,10 @@ if API_HOST == "azure":
         openai_api_version=os.environ["AZURE_OPENAI_VERSION"],
         azure_ad_token_provider=token_provider,
     )
-else:
+elif API_HOST == "github":
     model = ChatOpenAI(model=os.getenv("GITHUB_MODEL", "gpt-4o"), base_url="https://models.inference.ai.azure.com", api_key=os.environ["GITHUB_TOKEN"])
+elif API_HOST == "ollama":
+    model = ChatOpenAI(model=os.environ["OLLAMA_MODEL"], base_url=os.environ["OLLAMA_ENDPOINT"], api_key="none")
 
 model = model.bind_tools(tools, parallel_tool_calls=False)
 

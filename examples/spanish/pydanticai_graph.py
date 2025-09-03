@@ -5,13 +5,13 @@ import os
 from dataclasses import dataclass, field
 
 import azure.identity
+import logfire
 from dotenv import load_dotenv
 from groq import BaseModel
 from openai import AsyncAzureOpenAI, AsyncOpenAI
-from pydantic_ai import Agent
-from pydantic_ai.format_as_xml import format_as_xml
+from pydantic_ai import Agent, format_as_xml
 from pydantic_ai.messages import ModelMessage
-from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_graph import (
     BaseNode,
@@ -20,13 +20,16 @@ from pydantic_graph import (
     GraphRunContext,
 )
 
+logfire.configure(send_to_logfire=False, console=False)
+
+
 # Configuración del cliente OpenAI para usar Azure OpenAI o Modelos de GitHub
 load_dotenv(override=True)
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "github":
     client = AsyncOpenAI(api_key=os.environ["GITHUB_TOKEN"], base_url="https://models.inference.ai.azure.com")
-    model = OpenAIModel(os.getenv("GITHUB_MODEL", "gpt-4o"), provider=OpenAIProvider(openai_client=client))
+    model = OpenAIChatModel(os.getenv("GITHUB_MODEL", "gpt-4o"), provider=OpenAIProvider(openai_client=client))
 elif API_HOST == "azure":
     token_provider = azure.identity.get_bearer_token_provider(azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
     client = AsyncAzureOpenAI(
@@ -34,14 +37,17 @@ elif API_HOST == "azure":
         azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
         azure_ad_token_provider=token_provider,
     )
-    model = OpenAIModel(os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"], provider=OpenAIProvider(openai_client=client))
+    model = OpenAIChatModel(os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"], provider=OpenAIProvider(openai_client=client))
+elif API_HOST == "ollama":
+    client = AsyncOpenAI(base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"), api_key="none")
+    model = OpenAIChatModel(os.environ["OLLAMA_MODEL"], provider=OpenAIProvider(openai_client=client))
 
 
 """
 Definiciones de agentes
 """
 
-ask_agent = Agent(model, result_type=str, instrument=True)
+ask_agent = Agent(model, output_type=str, instrument=True)
 
 
 class EvaluationResult(BaseModel, use_attribute_docstrings=True):
@@ -53,7 +59,7 @@ class EvaluationResult(BaseModel, use_attribute_docstrings=True):
 
 evaluate_agent = Agent(
     model,
-    result_type=EvaluationResult,
+    output_type=EvaluationResult,
     system_prompt="Dada una pregunta y respuesta, evalúa si la respuesta es correcta.",
 )
 
@@ -77,8 +83,8 @@ class Ask(BaseNode[QuestionState]):
             message_history=ctx.state.ask_agent_messages,
         )
         ctx.state.ask_agent_messages += result.all_messages()
-        ctx.state.question = result.data
-        return Answer(result.data)
+        ctx.state.question = result.output
+        return Answer(result.output)
 
 
 @dataclass
@@ -104,10 +110,10 @@ class Evaluate(BaseNode[QuestionState, None, str]):
             message_history=ctx.state.evaluate_agent_messages,
         )
         ctx.state.evaluate_agent_messages += result.all_messages()
-        if result.data.correct:
-            return End(result.data.comment)
+        if result.output.correct:
+            return End(result.output.comment)
         else:
-            return Reprimand(result.data.comment)
+            return Reprimand(result.output.comment)
 
 
 @dataclass

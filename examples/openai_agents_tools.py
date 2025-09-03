@@ -4,14 +4,13 @@ import os
 import random
 from datetime import datetime
 
-import azure.identity
 import openai
-from agents import Agent, Runner, function_tool, set_tracing_disabled
+from agents import Agent, OpenAIChatCompletionsModel, Runner, function_tool, set_tracing_disabled
 from dotenv import load_dotenv
 from rich.logging import RichHandler
 
 # Setup logging with rich
-logging.basicConfig(level=logging.WARNING, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
+logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger("weekend_planner")
 
 # Disable tracing since we're not connected to a supported tracing provider
@@ -19,21 +18,8 @@ set_tracing_disabled(disabled=True)
 
 # Setup the OpenAI client to use either Azure OpenAI or GitHub Models
 load_dotenv(override=True)
-API_HOST = os.getenv("API_HOST", "github")
-if API_HOST == "github":
-    client = openai.AsyncOpenAI(base_url="https://models.inference.ai.azure.com", api_key=os.environ["GITHUB_TOKEN"])
-    MODEL_NAME = os.getenv("GITHUB_MODEL", "gpt-4o")
-elif API_HOST == "azure":
-    token_provider = azure.identity.get_bearer_token_provider(azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
-    client = openai.AsyncAzureOpenAI(
-        api_version=os.environ["AZURE_OPENAI_VERSION"],
-        azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-        azure_ad_token_provider=token_provider,
-    )
-    MODEL_NAME = os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"]
-elif API_HOST == "ollama":
-    client = openai.AsyncOpenAI(base_url="http://localhost:11434/v1", api_key="none")
-    MODEL_NAME = "llama3.1:latest"
+client = openai.AsyncOpenAI(base_url=os.environ["OLLAMA_ENDPOINT"], api_key="none")
+MODEL_NAME = os.environ["OLLAMA_MODEL"]
 
 
 @function_tool
@@ -70,11 +56,24 @@ def get_current_date() -> str:
     return datetime.now().strftime("%Y-%m-%d")
 
 
-agent = Agent(name="Weekend Planner", instructions="You help users plan their weekends and choose the best activities for the given weather. If an activity would be unpleasant in the weather, don't suggest it. Include the date of the weekend in your response.", tools=[get_weather, get_activities, get_current_date])
+@function_tool
+def python(input: str) -> str:
+    """Use this tool to execute Python code in your chain of thought. The code will not be shown to the user. This tool should be used for internal reasoning, but not for code that is intended to be visible to the user (e.g. when creating plots, tables, or files).
+    When you send a message containing python code to python, it will be executed in a stateless docker container, and the stdout of that process will be returned to you. You have to use print statements to access the output."""
+    print(f"Executing python code:\n{input}")
+
+
+agent = Agent(
+    name="Weekend Planner",
+    instructions="You help users do data science",
+    tools=[python],
+    # TODO: Figure out what exactly the tool description should look like
+    model=OpenAIChatCompletionsModel(model=MODEL_NAME, openai_client=client),
+)
 
 
 async def main():
-    result = await Runner.run(agent, input="hii what can I do this weekend in Seattle?")
+    result = await Runner.run(agent, input="hii make me a bar chart with three bars of 60 50 40")
     print(result.final_output)
 
 
