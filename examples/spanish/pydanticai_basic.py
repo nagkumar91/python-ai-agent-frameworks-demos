@@ -8,7 +8,7 @@ from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 
-# Setup the OpenAI client to use either Azure OpenAI or GitHub Models
+# Configuración del cliente OpenAI para usar Azure OpenAI o Modelos de GitHub
 load_dotenv(override=True)
 API_HOST = os.getenv("API_HOST", "github")
 
@@ -29,13 +29,13 @@ elif API_HOST == "ollama":
 
 agent: Agent[None, str] = Agent(
     model,
-    system_prompt="Eres un tutor de Ingles. Ayuda al usuario aprender Ingles. SOLO responde in Inglés.",
+    system_prompt="Eres un tutor de inglés. Ayuda al usuario a aprender inglés. SOLO responde en inglés.",
     output_type=str,
 )
 
 
 async def main():
-    result = await agent.run("hola hola, como estas?")
+    result = await agent.run("Hola. ¿Cómo estás?")
     print(result.output)
 
 

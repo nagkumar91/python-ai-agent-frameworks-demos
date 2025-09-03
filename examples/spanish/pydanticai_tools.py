@@ -16,7 +16,7 @@ from rich.logging import RichHandler
 logging.basicConfig(level=logging.WARNING, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger("planificador_fin_de_semana")
 
-# Configurar el cliente OpenAI para usar Azure OpenAI o Modelos de GitHub
+# Configuración del cliente OpenAI para usar Azure OpenAI o Modelos de GitHub
 load_dotenv(override=True)
 API_HOST = os.getenv("API_HOST", "github")
 
@@ -37,7 +37,7 @@ elif API_HOST == "ollama":
 
 
 def obtener_clima(ciudad: str, fecha: str) -> dict:
-    """Devuelve un clima simulado para la ciudad y fecha dadas."""
+    """Devuelve un clima simulado según la ciudad y la fecha proporcionadas."""
     logger.info(f"Obteniendo clima para {ciudad}")
     if random.random() < 0.05:
         return {
@@ -56,7 +56,7 @@ def obtener_clima(ciudad: str, fecha: str) -> dict:
 
 
 def obtener_actividades(ciudad: str, fecha: str) -> list:
-    """Devuelve una lista simulada de actividades disponibles."""
+    """Devuelve una lista simulada de actividades disponibles según la ciudad y la fecha proporcionadas."""
     logger.info(f"Obteniendo actividades para {ciudad} en {fecha}")
     return [
         {"nombre": "Senderismo", "lugar": ciudad},
@@ -72,7 +72,9 @@ def obtener_fecha_actual() -> str:
 
 agent = Agent(
     model,
-    system_prompt=("Ayudas a los usuarios a planificar su fin de semana y elegir las mejores actividades según el clima dado. " "Si una actividad sería desagradable con ese clima, no la sugieras. Incluye la fecha del fin de semana en tu respuesta."),
+    system_prompt=("Ayuda al usuario a planificar su fin de semana y a elegir las "
+    "mejores actividades según el clima proporcionado. No sugieras actividades que puedan "
+    "resultar desagradables con ese clima. Incluye la fecha del fin de semana en tu respuesta."),
     tools=[obtener_clima, obtener_actividades, obtener_fecha_actual],
 )
 

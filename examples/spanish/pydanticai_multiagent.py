@@ -12,7 +12,7 @@ from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from rich.prompt import Prompt
 
-# Configurar el cliente de OpenAI para usar Azure OpenAI o Modelos de GitHub
+# Configuración del cliente OpenAI para usar Azure OpenAI o Modelos de GitHub
 load_dotenv(override=True)
 API_HOST = os.getenv("API_HOST", "github")
 
@@ -76,7 +76,10 @@ class Seat(BaseModel):
 seat_preference_agent = Agent(
     model,
     output_type=Seat | Failed,
-    system_prompt=("Extrae la preferencia de asiento del usuario. " "Los asientos A y F son asientos de ventana. " "La fila 1 es la fila delantera y tiene más espacio para las piernas. " "Las filas 14 y 20 también tienen más espacio para las piernas. "),
+    system_prompt=("Extrae la preferencia de asiento del usuario. "
+                   "Los asientos A y F son asientos de ventana. "
+                   "La fila 1 es la fila delantera y tiene más espacio para las piernas. "
+                   "Las filas 14 y 20 también tienen más espacio para las piernas."),
 )
 
 

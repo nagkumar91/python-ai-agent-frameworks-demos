@@ -10,7 +10,7 @@ from pydantic_ai.mcp import MCPServerStreamableHTTP
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 
-# Configurar el cliente OpenAI para usar Azure OpenAI o Modelos de GitHub
+# Configuración del cliente OpenAI para usar Azure OpenAI o Modelos de GitHub
 load_dotenv(override=True)
 API_HOST = os.getenv("API_HOST", "github")
 
@@ -34,14 +34,17 @@ server = MCPServerStreamableHTTP(url="http://localhost:8000/mcp")
 
 agent: Agent[None, str] = Agent(
     model,
-    system_prompt=("Eres un agente que ayuda a planificar viajes. Puedes ayudar a los usuarios a encontrar hoteles. " "Usa las herramientas disponibles cuando sea útil."),
+    system_prompt=("Eres un agente que ayuda a planificar viajes. "
+    "Puedes ayudar a los usuarios a encontrar hoteles."
+),
     output_type=str,
     toolsets=[server],
 )
 
 
 async def main():
-    consulta = "Encuéntrame un hotel en Ciudad de México para 3 noches empezando el 2024-02-10. " "Necesito WiFi gratis y piscina."
+    consulta = "Encuéntrame un hotel en la Ciudad de México para 3 noches empezando el 2025-10-10. " \
+    "Necesito WiFi gratis y piscina."
     resultado = await agent.run(consulta)
     print(resultado.output)
 
