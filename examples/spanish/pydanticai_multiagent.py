@@ -64,7 +64,6 @@ async def find_flight() -> Flight | None:
         if isinstance(result.output, Flight):
             return result.output
         else:
-            # Deprecated result_tool_return_content removed; reuse messages
             message_history = result.all_messages()
 
 
