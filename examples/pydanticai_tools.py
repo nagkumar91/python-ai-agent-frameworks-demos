@@ -37,19 +37,17 @@ elif API_HOST == "ollama":
     model = OpenAIChatModel(os.environ["OLLAMA_MODEL"], provider=OpenAIProvider(openai_client=client))
 
 
-def get_weather(city: str, date: str) -> dict:
+def get_weather(city: str) -> dict:
     logger.info(f"Getting weather for {city}")
     if random.random() < 0.05:
         return {
             "city": city,
-            "date": date,
             "temperature": 72,
             "description": "Sunny",
         }
     else:
         return {
             "city": city,
-            "date": date,
             "temperature": 60,
             "description": "Rainy",
         }
