@@ -5,7 +5,6 @@ import os
 from dataclasses import dataclass, field
 
 import azure.identity
-import logfire
 from dotenv import load_dotenv
 from groq import BaseModel
 from openai import AsyncAzureOpenAI, AsyncOpenAI
@@ -19,9 +18,6 @@ from pydantic_graph import (
     Graph,
     GraphRunContext,
 )
-
-logfire.configure(send_to_logfire=False, console=False)
-
 
 # Configuración del cliente OpenAI para usar Azure OpenAI o Modelos de GitHub
 load_dotenv(override=True)
