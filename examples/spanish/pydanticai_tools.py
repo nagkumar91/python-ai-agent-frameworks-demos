@@ -80,7 +80,7 @@ agent = Agent(
 
 
 async def main():
-    consulta = "¿Qué puedo hacer este fin de semana en Madrid para divertirme?"
+    consulta = "¿Qué puedo hacer este fin de semana en Barcelona para divertirme?"
     resultado = await agent.run(consulta)
     print(resultado.output)
 
