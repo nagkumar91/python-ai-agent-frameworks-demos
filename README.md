@@ -89,22 +89,25 @@ You can run the examples in this repository by executing the scripts in the `exa
 
 | Example | Description |
 | ------- | ----------- |
-| autogen_basic.py | Uses AutoGen to build a single agent. |
-| autogen_tools.py | Uses AutoGen to build a single agent with tools. |
-| autogen_magenticone.py | Uses AutoGen with the MagenticOne orchestrator agent for travel planning. |
-| autogen_swarm.py | Uses AutoGen with the Swarm orchestrator agent for flight refunding requests. |
-| langgraph.py | Uses LangGraph to build an agent with a StateGraph to play songs. |
-| llamaindex.py | Uses LlamaIndex to build a ReAct agent for RAG on multiple indexes. |
-| openai_agents_basic.py | Uses the OpenAI Agents framework to build a single agent. |
-| openai_agents.py | Uses the OpenAI Agents framework to handoff between several agents with tools. |
-| openai_functioncalling.py | Uses OpenAI Function Calling to call functions based on LLM output. |
-| pydanticai_basic.py | Uses PydanticAI to build a basic single agent (Spanish tutor). |
-| pydanticai_multiagent.py | Uses PydanticAI to build a two-agent sequential workflow (flight + seat selection). |
-| pydanticai_graph.py | Uses PydanticAI with pydantic-graph to build a small question/answer evaluation graph. |
-| pydanticai_tools.py | Uses PydanticAI with multiple Python tools for weekend activity planning. |
-| pydanticai_mcp_http.py | Uses PydanticAI with an MCP HTTP server toolset for travel planning (hotel search). |
-| semantickernel.py | Uses Semantic Kernel to build a writer/editor two-agent workflow. |
-| smolagents_codeagent.py | Uses SmolAgents to build a question-answering agent that can search the web and run code. |
+| [autogen_basic.py](examples/autogen_basic.py) | Uses AutoGen to build a single agent. |
+| [autogen_tools.py](examples/autogen_tools.py) | Uses AutoGen to build a single agent with tools. |
+| [autogen_magenticone.py](examples/autogen_magenticone.py) | Uses AutoGen with the MagenticOne orchestrator agent for travel planning. |
+| [autogen_swarm.py](examples/autogen_swarm.py) | Uses AutoGen with the Swarm orchestrator agent for flight refunding requests. |
+| [langgraph_agent.py](examples/langgraph_agent.py) | Uses LangGraph to build an agent with a StateGraph to play songs. |
+| [llamaindex.py](examples/llamaindex.py) | Uses LlamaIndex to build a ReAct agent for RAG on multiple indexes. |
+| [openai_agents_basic.py](examples/openai_agents_basic.py) | Uses the OpenAI Agents framework to build a single agent. |
+| [openai_agents_handoffs.py](examples/openai_agents_handoffs.py) | Uses the OpenAI Agents framework to handoff between several agents with tools. |
+| [openai_agents_tools.py](examples/openai_agents_tools.py) | Uses the OpenAI Agents framework to build a weekend planner with tools. |
+| [openai_functioncalling.py](examples/openai_functioncalling.py) | Uses OpenAI Function Calling to call functions based on LLM output. |
+| [openai_githubmodels.py](examples/openai_githubmodels.py) | Basic setup for using GitHub models with the OpenAI API. |
+| [pydanticai_basic.py](examples/pydanticai_basic.py) | Uses PydanticAI to build a basic single agent (Spanish tutor). |
+| [pydanticai_multiagent.py](examples/pydanticai_multiagent.py) | Uses PydanticAI to build a two-agent sequential workflow (flight + seat selection). |
+| [pydanticai_graph.py](examples/pydanticai_graph.py) | Uses PydanticAI with pydantic-graph to build a small question/answer evaluation graph. |
+| [pydanticai_tools.py](examples/pydanticai_tools.py) | Uses PydanticAI with multiple Python tools for weekend activity planning. |
+| [pydanticai_mcp_http.py](examples/pydanticai_mcp_http.py) | Uses PydanticAI with an MCP HTTP server toolset for travel planning (hotel search). |
+| [semantickernel_basic.py](examples/semantickernel_basic.py) | Uses Semantic Kernel to build a simple agent that teaches Spanish. |
+| [semantickernel_groupchat.py](examples/semantickernel_groupchat.py) | Uses Semantic Kernel to build a writer/editor two-agent workflow. |
+| [smolagents_codeagent.py](examples/smolagents_codeagent.py) | Uses SmolAgents to build a question-answering agent that can search the web and run code. |
 
 ## Configuring GitHub Models
 
