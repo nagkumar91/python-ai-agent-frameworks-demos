@@ -49,29 +49,13 @@ if API_HOST == "azure":
         azure.identity.DefaultAzureCredential(),
         "https://cognitiveservices.azure.com/.default",
     )
-    model = AzureChatOpenAI(
-        azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
-        azure_deployment=os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT"),
-        openai_api_version=os.environ.get("AZURE_OPENAI_VERSION"),
-        azure_ad_token_provider=token_provider,
-        temperature=0,
-    )
+    model = AzureChatOpenAI(azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"), azure_deployment=os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT"), openai_api_version=os.environ.get("AZURE_OPENAI_VERSION"), azure_ad_token_provider=token_provider)
 elif API_HOST == "github":
-    model = ChatOpenAI(
-        model=os.getenv("GITHUB_MODEL", "gpt-4o"),
-        base_url="https://models.inference.ai.azure.com",
-        api_key=os.environ.get("GITHUB_TOKEN"),
-        temperature=0,
-    )
+    model = ChatOpenAI(model=os.getenv("GITHUB_MODEL", "gpt-4o"), base_url="https://models.inference.ai.azure.com", api_key=os.environ.get("GITHUB_TOKEN"))
 elif API_HOST == "ollama":
-    model = ChatOpenAI(
-        model=os.environ.get("OLLAMA_MODEL", "llama3.1"),
-        base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"),
-        api_key="none",
-        temperature=0,
-    )
-else:  # Fallback to public OpenAI
-    model = ChatOpenAI(model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"), temperature=0)
+    model = ChatOpenAI(model=os.environ.get("OLLAMA_MODEL", "llama3.1"), base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"), api_key="none")
+else:
+    model = ChatOpenAI(model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
 
 # ----------------------------------------------------------------------------
 # System prompt
@@ -151,11 +135,11 @@ def main():  # pragma: no cover - demo function
 
     # Follow-up thank you (should recall prior conversation)
     r2 = agent.invoke(
-        {"messages": [{"role": "user", "content": "Thanks!"}]},
+        {"messages": [{"role": "user", "content": "Thanks"}]},
         config=config,
         context=context,
     )
-    print(r2.content)
+    print(r2.get("structured_response"))
 
 
 if __name__ == "__main__":  # pragma: no cover
