@@ -1,27 +1,8 @@
 """LangChain v1 style weather agent example.
+https://docs.langchain.com/oss/python/langchain-quickstart
 
-This example mirrors the "real-world agent" pattern from the LangChain v1
-Quickstart docs, adapted to this repo's provider‑agnostic model configuration
-(Azure OpenAI / GitHub Models / Ollama / OpenAI) as seen in
-`langchainv1_agent.py`.
-
-Features demonstrated:
-* Provider-flexible model initialization via env var API_HOST (azure|github|ollama|other)
-* System prompt with behavioral instructions and tool usage guidance
-* Two tools: get_weather_for_location + get_user_location (using config context)
-* Structured output via dataclass `WeatherResponse`
-* Conversation memory using an in‑memory LangGraph checkpointer
-* Multiple invocations showing preserved context
-
-Environment variables respected (similar to other examples):
-  API_HOST=azure|github|ollama|other (default github)
-  AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_CHAT_DEPLOYMENT, AZURE_OPENAI_VERSION
-  GITHUB_TOKEN, GITHUB_MODEL
-  OLLAMA_ENDPOINT, OLLAMA_MODEL
-  OPENAI_API_KEY, OPENAI_MODEL
-
-Run:
-  python examples/langchainv1_weather_agent.py
+This example mirrors the pattern from the LangChain v1 Quickstart docs,
+adapted to this repo's multiple-provider model configuration.
 """
 from __future__ import annotations
 

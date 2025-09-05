@@ -1,14 +1,3 @@
-"""LangChain v1 style music-playing agent example.
-
-Updated to follow the LangChain v1 quickstart patterns:
-* Uses `create_agent` instead of building a manual `StateGraph`.
-* Uses a system prompt string + tools list directly.
-* Demonstrates provider‑agnostic model initialization (Azure OpenAI, GitHub Models, Ollama).
-* Adds optional structured output via a dataclass.
-
-Docs reference: https://docs.langchain.com/oss/python/langchain-quickstart
-"""
-
 from __future__ import annotations
 
 import os

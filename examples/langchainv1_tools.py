@@ -1,5 +1,3 @@
-"""LangChain v1: Agent with tools.
-"""
 import logging
 import os
 import random

@@ -1,6 +1,3 @@
-"""LangChain v1 basic agent example, no tools.
-"""
-
 import os
 
 import azure.identity
