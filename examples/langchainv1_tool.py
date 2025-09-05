@@ -45,7 +45,7 @@ else:
 
 
 @tool
-def get_weather(city: str) -> str:
+def get_weather(city: str) -> dict:
     """Returns weather data for a given city, a dictionary with temperature and description."""
     logger.info(f"Getting weather for {city}")
     if random.random() < 0.05:
