@@ -98,6 +98,10 @@ You can run the examples in this repository by executing the scripts in the `exa
 | [langchainv1_tools.py](examples/langchainv1_tools.py) | Uses LangChain v1 to build a weekend planning agent with multiple tools. |
 | [langchainv1_supervisor.py](examples/langchainv1_supervisor.py) | Uses LangChain v1 with a supervisor orchestrating activity and recipe sub-agents. |
 | [langchainv1_quickstart.py](examples/langchainv1_quickstart.py) | Uses LangChain v1 to build an assistant with tool calling, structured output, and memory. Based off official Quickstart docs. |
+| [langgraph_agent.py](examples/langgraph_agent.py) | Builds LangGraph graph for an agent to play songs. |
+| [langgraph_mcp_http.py](examples/langgraph_mcp_http.py) | Uses LangGraph with ReAct agent that uses tools from local MCP HTTP server. |
+| [langgraph_mcp_http_graph.py](examples/langgraph_mcp_http_graph.py) | Builds a custom LangGraph state graph using tools from local MCP HTTP server. |
+| [langgraph_mcp_github.py](examples/langgraph_mcp_github.py) | Uses a LangGraph with agent and GitHub MCP server to triage repository issues. |
 | [llamaindex.py](examples/llamaindex.py) | Uses LlamaIndex to build a ReAct agent for RAG on multiple indexes. |
 | [openai_agents_basic.py](examples/openai_agents_basic.py) | Uses the OpenAI Agents framework to build a single agent. |
 | [openai_agents_handoffs.py](examples/openai_agents_handoffs.py) | Uses the OpenAI Agents framework to handoff between several agents with tools. |
