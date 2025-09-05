@@ -93,7 +93,11 @@ You can run the examples in this repository by executing the scripts in the `exa
 | [autogen_tools.py](examples/autogen_tools.py) | Uses AutoGen to build a single agent with tools. |
 | [autogen_magenticone.py](examples/autogen_magenticone.py) | Uses AutoGen with the MagenticOne orchestrator agent for travel planning. |
 | [autogen_swarm.py](examples/autogen_swarm.py) | Uses AutoGen with the Swarm orchestrator agent for flight refunding requests. |
-| [langgraph_agent.py](examples/langgraph_agent.py) | Uses LangGraph to build an agent with a StateGraph to play songs. |
+| [langchainv1_basic.py](examples/langchainv1_basic.py) | Uses LangChain v1 to build a basic informational agent. |
+| [langchainv1_tool.py](examples/langchainv1_tool.py) | Uses LangChain v1 to build an agent with a single weather tool. |
+| [langchainv1_tools.py](examples/langchainv1_tools.py) | Uses LangChain v1 to build a weekend planning agent with multiple tools. |
+| [langchainv1_supervisor.py](examples/langchainv1_supervisor.py) | Uses LangChain v1 with a supervisor orchestrating activity and recipe sub-agents. |
+| [langchainv1_quickstart.py](examples/langchainv1_quickstart.py) | Uses LangChain v1 to build an assistant with tool calling, structured output, and memory. Based off official Quickstart docs. |
 | [llamaindex.py](examples/llamaindex.py) | Uses LlamaIndex to build a ReAct agent for RAG on multiple indexes. |
 | [openai_agents_basic.py](examples/openai_agents_basic.py) | Uses the OpenAI Agents framework to build a single agent. |
 | [openai_agents_handoffs.py](examples/openai_agents_handoffs.py) | Uses the OpenAI Agents framework to handoff between several agents with tools. |
