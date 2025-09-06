@@ -1,3 +1,10 @@
+"""PydanticAI + MCP HTTP example.
+
+Prerequisite:
+Start the local MCP server defined in `mcp_server_basic.py` on port 8000:
+    python examples/mcp_server_basic.py
+"""
+
 import asyncio
 import logging
 import os

@@ -87,12 +87,19 @@ A related option is VS Code Dev Containers, which will open the project in your 
 
 You can run the examples in this repository by executing the scripts in the `examples` directory. Each script demonstrates a different AI agent pattern or framework.
 
+### Autogen
+
 | Example | Description |
 | ------- | ----------- |
 | [autogen_basic.py](examples/autogen_basic.py) | Uses AutoGen to build a single agent. |
 | [autogen_tools.py](examples/autogen_tools.py) | Uses AutoGen to build a single agent with tools. |
 | [autogen_magenticone.py](examples/autogen_magenticone.py) | Uses AutoGen with the MagenticOne orchestrator agent for travel planning. |
 | [autogen_swarm.py](examples/autogen_swarm.py) | Uses AutoGen with the Swarm orchestrator agent for flight refunding requests. |
+
+### Langchain v1 and LangGraph
+
+| Example | Description |
+| ------- | ----------- |
 | [langchainv1_basic.py](examples/langchainv1_basic.py) | Uses LangChain v1 to build a basic informational agent. |
 | [langchainv1_tool.py](examples/langchainv1_tool.py) | Uses LangChain v1 to build an agent with a single weather tool. |
 | [langchainv1_tools.py](examples/langchainv1_tools.py) | Uses LangChain v1 to build a weekend planning agent with multiple tools. |
@@ -102,19 +109,41 @@ You can run the examples in this repository by executing the scripts in the `exa
 | [langgraph_mcp_http.py](examples/langgraph_mcp_http.py) | Uses LangGraph with ReAct agent that uses tools from local MCP HTTP server. |
 | [langgraph_mcp_http_graph.py](examples/langgraph_mcp_http_graph.py) | Builds a custom LangGraph state graph using tools from local MCP HTTP server. |
 | [langgraph_mcp_github.py](examples/langgraph_mcp_github.py) | Uses a LangGraph with agent and GitHub MCP server to triage repository issues. |
-| [llamaindex.py](examples/llamaindex.py) | Uses LlamaIndex to build a ReAct agent for RAG on multiple indexes. |
+
+### OpenAI and OpenAI-Agents
+
+| Example | Description |
+| ------- | ----------- |
+| [openai_githubmodels.py](examples/openai_githubmodels.py) | Basic setup for using GitHub models with the OpenAI API. |
+| [openai_functioncalling.py](examples/openai_functioncalling.py) | Uses OpenAI Function Calling to call functions based on LLM output. |
 | [openai_agents_basic.py](examples/openai_agents_basic.py) | Uses the OpenAI Agents framework to build a single agent. |
 | [openai_agents_handoffs.py](examples/openai_agents_handoffs.py) | Uses the OpenAI Agents framework to handoff between several agents with tools. |
 | [openai_agents_tools.py](examples/openai_agents_tools.py) | Uses the OpenAI Agents framework to build a weekend planner with tools. |
-| [openai_functioncalling.py](examples/openai_functioncalling.py) | Uses OpenAI Function Calling to call functions based on LLM output. |
-| [openai_githubmodels.py](examples/openai_githubmodels.py) | Basic setup for using GitHub models with the OpenAI API. |
+| [openai_agents_mcp_http.py](examples/openai_agents_mcp_http.py) | Uses the OpenAI Agents framework with an MCP HTTP server (travel planning tools). |
+
+### PydanticAI
+
+| Example | Description |
+| ------- | ----------- |
 | [pydanticai_basic.py](examples/pydanticai_basic.py) | Uses PydanticAI to build a basic single agent (Spanish tutor). |
 | [pydanticai_multiagent.py](examples/pydanticai_multiagent.py) | Uses PydanticAI to build a two-agent sequential workflow (flight + seat selection). |
 | [pydanticai_graph.py](examples/pydanticai_graph.py) | Uses PydanticAI with pydantic-graph to build a small question/answer evaluation graph. |
 | [pydanticai_tools.py](examples/pydanticai_tools.py) | Uses PydanticAI with multiple Python tools for weekend activity planning. |
 | [pydanticai_mcp_http.py](examples/pydanticai_mcp_http.py) | Uses PydanticAI with an MCP HTTP server toolset for travel planning (hotel search). |
+
+### Semantic Kernel
+
+| Example | Description |
+| ------- | ----------- |
 | [semantickernel_basic.py](examples/semantickernel_basic.py) | Uses Semantic Kernel to build a simple agent that teaches Spanish. |
 | [semantickernel_groupchat.py](examples/semantickernel_groupchat.py) | Uses Semantic Kernel to build a writer/editor two-agent workflow. |
+| [semantickernel_mcp_http.py](examples/semantickernel_mcp_http.py) | Uses Semantic Kernel agent with tools from a local MCP HTTP server for hotel search. |
+
+### Other frameworks
+
+| Example | Description |
+| ------- | ----------- |
+| [llamaindex.py](examples/llamaindex.py) | Uses LlamaIndex to build a ReAct agent for RAG on multiple indexes. |
 | [smolagents_codeagent.py](examples/smolagents_codeagent.py) | Uses SmolAgents to build a question-answering agent that can search the web and run code. |
 
 ## Configuring GitHub Models
