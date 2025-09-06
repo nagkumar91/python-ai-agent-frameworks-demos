@@ -1,4 +1,9 @@
-# https://github.com/JRAlexander/IntroToAgents1-Oxford/blob/main/intro-langgraph/time-travel.ipynb
+"""LangGraph ReAct agent + MCP HTTP itinerary server example.
+
+Prerequisite:
+Start the local MCP server defined in `mcp_server_basic.py` on port 8000:
+    python examples/mcp_server_basic.py
+"""
 
 import os
 

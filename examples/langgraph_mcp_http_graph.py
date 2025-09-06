@@ -1,3 +1,10 @@
+"""Custom LangGraph state graph + MCP HTTP example.
+
+Prerequisite:
+Start the local MCP server defined in `mcp_server_basic.py` on port 8000:
+    python examples/mcp_server_basic.py
+"""
+
 import os
 
 import azure.identity
