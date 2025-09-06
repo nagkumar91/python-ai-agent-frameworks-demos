@@ -22,25 +22,33 @@ from rich import print
 load_dotenv(override=True)
 API_HOST = os.getenv("API_HOST", "github")
 
-# ----------------------------------------------------------------------------
-# Model configuration (copied / adapted from langchainv1_agent.py)
-# ----------------------------------------------------------------------------
 if API_HOST == "azure":
     token_provider = azure.identity.get_bearer_token_provider(
         azure.identity.DefaultAzureCredential(),
         "https://cognitiveservices.azure.com/.default",
     )
-    model = AzureChatOpenAI(azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"), azure_deployment=os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT"), openai_api_version=os.environ.get("AZURE_OPENAI_VERSION"), azure_ad_token_provider=token_provider)
+    model = AzureChatOpenAI(
+        azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
+        azure_deployment=os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT"),
+        openai_api_version=os.environ.get("AZURE_OPENAI_VERSION"),
+        azure_ad_token_provider=token_provider,
+    )
 elif API_HOST == "github":
-    model = ChatOpenAI(model=os.getenv("GITHUB_MODEL", "gpt-4o"), base_url="https://models.inference.ai.azure.com", api_key=os.environ.get("GITHUB_TOKEN"))
+    model = ChatOpenAI(
+        model=os.getenv("GITHUB_MODEL", "gpt-4o"),
+        base_url="https://models.inference.ai.azure.com",
+        api_key=os.environ.get("GITHUB_TOKEN"),
+    )
 elif API_HOST == "ollama":
-    model = ChatOpenAI(model=os.environ.get("OLLAMA_MODEL", "llama3.1"), base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"), api_key="none")
+    model = ChatOpenAI(
+        model=os.environ.get("OLLAMA_MODEL", "llama3.1"),
+        base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"),
+        api_key="none",
+    )
 else:
     model = ChatOpenAI(model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
 
-# ----------------------------------------------------------------------------
-# System prompt
-# ----------------------------------------------------------------------------
+
 system_prompt = """You are an expert weather forecaster, who speaks in puns.
 
 You have access to two tools:
@@ -48,11 +56,10 @@ You have access to two tools:
 - get_weather_for_location: use this to get the weather for a specific location
 - get_user_location: use this to get the user's location
 
-If a user asks you for the weather, make sure you know the location. If you can tell from the question that they mean whereever they are, use the get_user_location tool to find their location."""
+If a user asks you for the weather, make sure you know the location.
+If you can tell from the question that they mean whereever they are,
+use the get_user_location tool to find their location."""
 
-# ----------------------------------------------------------------------------
-# Tools
-# ----------------------------------------------------------------------------
 # Mock user locations keyed by user id (string)
 USER_LOCATION = {
     "1": "Florida",
@@ -79,24 +86,14 @@ def get_user_info(config: RunnableConfig) -> str:
     return USER_LOCATION[user_id]
 
 
-# ----------------------------------------------------------------------------
-# Structured output
-# ----------------------------------------------------------------------------
 @dataclass
 class WeatherResponse:
     conditions: str
     punny_response: str
 
 
-# ----------------------------------------------------------------------------
-# Memory (LangGraph checkpointer)
-# ----------------------------------------------------------------------------
 checkpointer = InMemorySaver()
 
-
-# ----------------------------------------------------------------------------
-# Agent creation
-# ----------------------------------------------------------------------------
 agent = create_agent(
     model=model,
     prompt=system_prompt,
@@ -106,15 +103,15 @@ agent = create_agent(
 )
 
 
-def main():  # pragma: no cover - demo function
+def main():
     config = {"configurable": {"thread_id": "1"}}
     context = UserContext(user_id="1")
 
-    # First user asks generally about weather "outside" -> should get location first
-    r1 = agent.invoke({"messages": [{"role": "user", "content": "what is the weather outside?"}]}, config=config, context=context)
+    r1 = agent.invoke(
+        {"messages": [{"role": "user", "content": "what is the weather outside?"}]}, config=config, context=context
+    )
     print(r1.get("structured_response"))
 
-    # Follow-up thank you (should recall prior conversation)
     r2 = agent.invoke(
         {"messages": [{"role": "user", "content": "Thanks"}]},
         config=config,
@@ -123,5 +120,5 @@ def main():  # pragma: no cover - demo function
     print(r2.get("structured_response"))
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
     main()

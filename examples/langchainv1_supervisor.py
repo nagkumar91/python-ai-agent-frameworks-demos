@@ -23,11 +23,24 @@ if API_HOST == "azure":
         azure.identity.DefaultAzureCredential(),
         "https://cognitiveservices.azure.com/.default",
     )
-    base_model = AzureChatOpenAI(azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"), azure_deployment=os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT"), openai_api_version=os.environ.get("AZURE_OPENAI_VERSION"), azure_ad_token_provider=token_provider)
+    base_model = AzureChatOpenAI(
+        azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
+        azure_deployment=os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT"),
+        openai_api_version=os.environ.get("AZURE_OPENAI_VERSION"),
+        azure_ad_token_provider=token_provider,
+    )
 elif API_HOST == "github":
-    base_model = ChatOpenAI(model=os.getenv("GITHUB_MODEL", "gpt-4o"), base_url="https://models.inference.ai.azure.com", api_key=os.environ.get("GITHUB_TOKEN"))
+    base_model = ChatOpenAI(
+        model=os.getenv("GITHUB_MODEL", "gpt-4o"),
+        base_url="https://models.inference.ai.azure.com",
+        api_key=os.environ.get("GITHUB_TOKEN"),
+    )
 elif API_HOST == "ollama":
-    base_model = ChatOpenAI(model=os.environ.get("OLLAMA_MODEL", "llama3.1"), base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"), api_key="none")
+    base_model = ChatOpenAI(
+        model=os.environ.get("OLLAMA_MODEL", "llama3.1"),
+        base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"),
+        api_key="none",
+    )
 else:
     base_model = ChatOpenAI(model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
 
@@ -71,7 +84,11 @@ def get_current_date() -> str:
 
 activity_agent = create_agent(
     model=base_model,
-    prompt="You help users plan their weekends and choose the best activities for the given weather. If an activity would be unpleasant in the weather, don't suggest it. Include the date of the weekend in your response.",
+    prompt=(
+        "You help users plan their weekends and choose the best activities for the given weather."
+        "If an activity would be unpleasant in the weather, don't suggest it."
+        "Include the date of the weekend in your response."
+    ),
     tools=[get_weather, get_activities, get_current_date],
 )
 
@@ -85,16 +102,39 @@ def activity_agent_tool(query: str) -> str:
     return final
 
 
+# ----------------------------------------------------------------------------------
+# SUB-AGENT 2: Recipe planning agent
+# ----------------------------------------------------------------------------------
+
+
 @tool
 def find_recipes(query: str) -> list[str]:
     """Returns recipes based on a query."""
     logger.info(f"Finding recipes for '{query}'")
     if "pasta" in query.lower():
-        return ["Pasta Primavera: Ingredients - pasta, vegetables, olive oil. Instructions - Cook pasta. Sauté vegetables. Mix together."]
+        return [
+            {
+                "title": "Pasta Primavera",
+                "ingredients": ["pasta", "vegetables", "olive oil"],
+                "steps": ["Cook pasta.", "Sauté vegetables."],
+            }
+        ]
     elif "tofu" in query.lower():
-        return ["Tofu Stir Fry: Ingredients - tofu, soy sauce, vegetables. Instructions - Press and cube tofu. Stir fry vegetables. Add tofu and soy sauce."]
+        return [
+            {
+                "title": "Tofu Stir Fry",
+                "ingredients": ["tofu", "soy sauce", "vegetables"],
+                "steps": ["Cube tofu.", "Stir fry veggies."],
+            }
+        ]
     else:
-        return ["Grilled Cheese Sandwich: Ingredients - bread, cheese, butter. Instructions - Butter bread. Place cheese between slices. Grill until golden brown."]
+        return [
+            {
+                "title": "Grilled Cheese Sandwich",
+                "ingredients": ["bread", "cheese", "butter"],
+                "steps": ["Butter bread.", "Place cheese between slices.", "Grill until golden brown."],
+            }
+        ]
 
 
 @tool
@@ -107,7 +147,15 @@ def check_fridge() -> list[str]:
         return ["tofu", "soy sauce", "broccoli", "carrots"]
 
 
-recipe_agent = create_agent(model=base_model, prompt="You help users plan meals and choose the best recipes for the given dietary preferences and restrictions. Include the ingredients and cooking instructions in your response. Indicate what user needs to buy from store when their fridge is missing ingredients.", tools=[find_recipes, check_fridge])
+recipe_agent = create_agent(
+    model=base_model,
+    prompt=(
+        "You help users plan meals and choose the best recipes."
+        "Include the ingredients and cooking instructions in your response."
+        "Indicate what user needs to buy from store when their fridge is missing ingredients."
+    ),
+    tools=[find_recipes, check_fridge],
+)
 
 
 @tool
@@ -119,9 +167,15 @@ def recipe_agent_tool(query: str) -> str:
     return final
 
 
+# ----------------------------------------------------------------------------------
+# SUPERVISOR AGENT: Manages the sub-agents
+# ----------------------------------------------------------------------------------
 supervisor_agent = create_agent(
     model=base_model,
-    prompt="You are a supervisor, managing an activity planning agent and recipe planning agent. Assign work to them as needed in order to answer user's question.",
+    prompt=(
+        "You are a supervisor, managing an activity planning agent and recipe planning agent."
+        "Assign work to them as needed in order to answer user's question."
+    ),
     tools=[activity_agent_tool, recipe_agent_tool],
 )
 
