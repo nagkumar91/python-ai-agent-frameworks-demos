@@ -108,7 +108,7 @@ def activity_agent_tool(query: str) -> str:
 
 
 @tool
-def find_recipes(query: str) -> list[str]:
+def find_recipes(query: str) -> list[dict]:
     """Returns recipes based on a query."""
     logger.info(f"Finding recipes for '{query}'")
     if "pasta" in query.lower():
