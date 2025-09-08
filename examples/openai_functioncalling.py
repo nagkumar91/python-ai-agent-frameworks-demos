@@ -12,7 +12,9 @@ if API_HOST == "github":
     client = openai.OpenAI(base_url="https://models.inference.ai.azure.com", api_key=os.environ["GITHUB_TOKEN"])
     MODEL_NAME = os.getenv("GITHUB_MODEL", "gpt-4o")
 elif API_HOST == "azure":
-    token_provider = azure.identity.get_bearer_token_provider(azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
+    token_provider = azure.identity.get_bearer_token_provider(
+        azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+    )
     client = openai.AzureOpenAI(
         api_version=os.environ["AZURE_OPENAI_VERSION"],
         azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
@@ -41,38 +43,16 @@ tools = [
                 "additionalProperties": False,
             },
         },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "lookup_movies",
-            "description": "Lookup movies playing in a given city name or zip code.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "city_name": {
-                        "type": "string",
-                        "description": "The city name",
-                    },
-                    "zip_code": {
-                        "type": "string",
-                        "description": "The zip code",
-                    },
-                },
-                "additionalProperties": False,
-            },
-        },
-    },
+    }
 ]
 
 response = client.chat.completions.create(
     model=MODEL_NAME,
     messages=[
-        {"role": "system", "content": "You are a tourism chatbot."},
-        {"role": "user", "content": "is it rainy enough in sydney to watch movies and which ones are on?"},
+        {"role": "system", "content": "You're a weather chatbot"},
+        {"role": "user", "content": "whats the weather in NYC?"},
     ],
     tools=tools,
-    tool_choice="auto",
 )
 
 print(f"Response from {MODEL_NAME} on {API_HOST}: \n")
