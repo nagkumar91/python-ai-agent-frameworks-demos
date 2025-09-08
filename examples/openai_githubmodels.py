@@ -17,6 +17,6 @@ response = client.chat.completions.create(
             "content": "What is the capital of France?",
         },
     ],
-    model=os.getenv("GITHUB_MODEL", "gpt-4o"),
+    model=os.getenv("GITHUB_MODEL", "gpt-5-mini"),
 )
 print(response.choices[0].message.content)
