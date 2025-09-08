@@ -82,7 +82,7 @@ def get_current_date() -> str:
     return datetime.now().strftime("%Y-%m-%d")
 
 
-activity_agent = create_agent(
+weekend_agent = create_agent(
     model=base_model,
     prompt=(
         "You help users plan their weekends and choose the best activities for the given weather."
@@ -94,10 +94,10 @@ activity_agent = create_agent(
 
 
 @tool
-def activity_agent_tool(query: str) -> str:
+def weekend_agent_tool(query: str) -> str:
     """Invoke the activity planning agent and return its final response as plain text."""
-    logger.info("Tool:activity_agent invoked")
-    response = activity_agent.invoke({"messages": [HumanMessage(content=query)]})
+    logger.info("Tool:weekend_agent invoked")
+    response = weekend_agent.invoke({"messages": [HumanMessage(content=query)]})
     final = response["messages"][-1].content
     return final
 
@@ -147,7 +147,7 @@ def check_fridge() -> list[str]:
         return ["tofu", "soy sauce", "broccoli", "carrots"]
 
 
-recipe_agent = create_agent(
+meal_agent = create_agent(
     model=base_model,
     prompt=(
         "You help users plan meals and choose the best recipes."
@@ -159,10 +159,10 @@ recipe_agent = create_agent(
 
 
 @tool
-def recipe_agent_tool(query: str) -> str:
+def meal_agent_tool(query: str) -> str:
     """Invoke the recipe planning agent and return its final response as plain text."""
-    logger.info("Tool:recipe_agent invoked")
-    response = recipe_agent.invoke({"messages": [HumanMessage(content=query)]})
+    logger.info("Tool:meal_agent invoked")
+    response = meal_agent.invoke({"messages": [HumanMessage(content=query)]})
     final = response["messages"][-1].content
     return final
 
@@ -176,7 +176,7 @@ supervisor_agent = create_agent(
         "You are a supervisor, managing an activity planning agent and recipe planning agent."
         "Assign work to them as needed in order to answer user's question."
     ),
-    tools=[activity_agent_tool, recipe_agent_tool],
+    tools=[weekend_agent_tool, meal_agent_tool],
 )
 
 
