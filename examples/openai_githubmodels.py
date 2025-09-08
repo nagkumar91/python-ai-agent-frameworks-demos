@@ -1,6 +1,9 @@
 import os
 
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv(override=True)
 
 client = OpenAI(
     base_url="https://models.inference.ai.azure.com",
@@ -17,6 +20,6 @@ response = client.chat.completions.create(
             "content": "What is the capital of France?",
         },
     ],
-    model=os.getenv("GITHUB_MODEL", "gpt-4o"),
+    model=os.getenv("GITHUB_MODEL", "gpt-5-mini"),
 )
 print(response.choices[0].message.content)
