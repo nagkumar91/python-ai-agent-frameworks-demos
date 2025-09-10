@@ -7,12 +7,52 @@ import openai
 from agents import Agent, OpenAIChatCompletionsModel, Runner, set_tracing_disabled
 from dotenv import load_dotenv
 
+# Import OpenTelemetry components
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.instrumentation.openai_agents import OpenAIAgentsInstrumentor
+
+load_dotenv(override=True)
+# Try to import Azure Monitor exporter
+try:
+    from azure.monitor.opentelemetry.exporter import AzureMonitorTraceExporter
+except ImportError:
+    AzureMonitorTraceExporter = None
+    print("Warning: Azure Monitor exporter not installed. Install with: pip install azure-monitor-opentelemetry-exporter")
+
 logging.basicConfig(level=logging.WARNING)
-# Disable tracing since we're not connected to a supported tracing provider
-set_tracing_disabled(disabled=True)
+
+
+def _configure_otel() -> None:
+    """Configure OpenTelemetry with Azure Monitor or console export."""
+    conn = os.getenv("APPLICATION_INSIGHTS_CONNECTION_STRING")
+    resource = Resource.create({"service.name": "spanish-tutor-app"})
+    
+    tp = TracerProvider(resource=resource)
+    
+    if conn and AzureMonitorTraceExporter:
+        tp.add_span_processor(BatchSpanProcessor(AzureMonitorTraceExporter.from_connection_string(conn)))
+        # tp.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))  # Uncomment for debugging
+        print("[otel] Azure Monitor trace exporter configured")
+    else:
+        tp.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
+        print("[otel] Console span exporter configured")
+        if not conn:
+            print("[otel] To send traces to Application Insights, set APPLICATION_INSIGHTS_CONNECTION_STRING environment variable")
+    
+    trace.set_tracer_provider(tp)
+
+
+# Configure OpenTelemetry with Azure Monitor
+_configure_otel()
+
+# Instrument OpenAI Agents - this will automatically trace all agent operations
+OpenAIAgentsInstrumentor().instrument()
 
 # Setup the OpenAI client to use either Azure OpenAI or GitHub Models
-load_dotenv(override=True)
+
 API_HOST = os.getenv("API_HOST", "github")
 if API_HOST == "github":
     client = openai.AsyncOpenAI(base_url="https://models.inference.ai.azure.com", api_key=os.environ["GITHUB_TOKEN"])
@@ -37,9 +77,16 @@ agent = Agent(
 
 
 async def main():
-    result = await Runner.run(agent, input="hi how are you?")
-    print(result.final_output)
+    # Create a root span for the main operation
+    tracer = trace.get_tracer(__name__)
+    with tracer.start_as_current_span("spanish_tutor_session"):
+        result = await Runner.run(agent, input="hi how are you?")
+        print(result.final_output)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    finally:
+        # Ensure all spans are flushed before exit
+        trace.get_tracer_provider().shutdown()

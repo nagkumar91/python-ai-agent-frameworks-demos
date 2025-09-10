@@ -7,11 +7,50 @@ from agents import Agent, OpenAIChatCompletionsModel, Runner, function_tool, set
 from agents.extensions.visualization import draw_graph
 from dotenv import load_dotenv
 
-# Disable tracing since we're not using OpenAI.com models
-set_tracing_disabled(disabled=True)
+# Import OpenTelemetry components
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.instrumentation.openai_agents import OpenAIAgentsInstrumentor
+
+load_dotenv(override=True)
+# Try to import Azure Monitor exporter
+try:
+    from azure.monitor.opentelemetry.exporter import AzureMonitorTraceExporter
+except ImportError:
+    AzureMonitorTraceExporter = None
+    print("Warning: Azure Monitor exporter not installed. Install with: pip install azure-monitor-opentelemetry-exporter")
+
+
+def _configure_otel() -> None:
+    """Configure OpenTelemetry with Azure Monitor or console export."""
+    conn = os.getenv("APPLICATION_INSIGHTS_CONNECTION_STRING")
+    resource = Resource.create({"service.name": "multi-agent-weather-service"})
+    
+    tp = TracerProvider(resource=resource)
+    
+    if conn and AzureMonitorTraceExporter:
+        tp.add_span_processor(BatchSpanProcessor(AzureMonitorTraceExporter.from_connection_string(conn)))
+        # tp.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))  # Uncomment for debugging
+        print("[otel] Azure Monitor trace exporter configured")
+    else:
+        tp.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
+        print("[otel] Console span exporter configured")
+        if not conn:
+            print("[otel] To send traces to Application Insights, set APPLICATION_INSIGHTS_CONNECTION_STRING environment variable")
+    
+    trace.set_tracer_provider(tp)
+
+
+# Configure OpenTelemetry with Azure Monitor
+_configure_otel()
+
+# Instrument OpenAI Agents - this will automatically trace all agent operations
+OpenAIAgentsInstrumentor().instrument()
 
 # Setup the OpenAI client to use either Azure OpenAI or GitHub Models
-load_dotenv(override=True)
+
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "github":
@@ -68,9 +107,32 @@ triage_agent = Agent(
 
 
 async def main():
-    result = await Runner.run(triage_agent, input="Hola, ¿cómo estás? ¿Puedes darme el clima para San Francisco CA?")
-    print(result.final_output)
+    # Create a root span for better tracing context
+    tracer = trace.get_tracer(__name__)
+    with tracer.start_as_current_span("weather_service_request") as span:
+        # Add custom attributes for better observability
+        user_request = "Hola, ¿cómo estás? ¿Puedes darme el clima para San Francisco CA?"
+        span.set_attribute("user.request", user_request)
+        span.set_attribute("api.host", API_HOST)
+        span.set_attribute("model.name", MODEL_NAME)
+        
+        try:
+            result = await Runner.run(triage_agent, input=user_request)
+            print(result.final_output)
+            
+            # Add result to span for observability
+            span.set_attribute("agent.response", result.final_output[:500] if result.final_output else "")
+            span.set_attribute("request.success", True)
+        except Exception as e:
+            # Record error in span
+            span.record_exception(e)
+            span.set_attribute("request.success", False)
+            raise
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    finally:
+        # Ensure all spans are flushed before exit
+        trace.get_tracer_provider().shutdown()
