@@ -9,6 +9,9 @@ from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
+from langchain_azure_ai.callbacks.tracers import AzureOpenAITracingCallback
+
+
 
 
 @tool
@@ -30,6 +33,10 @@ tool_node = ToolNode(tools)
 
 # Setup the client to use either Azure OpenAI or GitHub Models
 load_dotenv(override=True)
+azure_tracer = AzureOpenAITracingCallback(
+    connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
+    enable_content_recording=True
+)
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "azure":
@@ -115,7 +122,7 @@ memory = MemorySaver()
 # This will add a breakpoint before the `action` node is called
 app = workflow.compile(checkpointer=memory)
 
-config = {"configurable": {"thread_id": "1"}}
+config = {"configurable": {"thread_id": "1"}, "callbacks": [azure_tracer]}
 input_message = HumanMessage(content="Can you play Taylor Swift's most popular song?")
 for event in app.stream({"messages": [input_message]}, config, stream_mode="values"):
     event["messages"][-1].pretty_print()

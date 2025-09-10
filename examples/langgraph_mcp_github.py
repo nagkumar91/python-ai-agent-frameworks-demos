@@ -6,9 +6,14 @@ from dotenv import load_dotenv
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langgraph.prebuilt import create_react_agent
+from langchain_azure_ai.callbacks.tracers import AzureOpenAITracingCallback
 
 # Setup the client to use either Azure OpenAI or GitHub Models
 load_dotenv(override=True)
+azure_tracer = AzureOpenAITracingCallback(
+    connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
+    enable_content_recording=True
+)
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "azure":
@@ -35,14 +40,15 @@ async def setup_agent():
             }
         }
     )
-
+    config = {"callbacks": [azure_tracer]}
     tools = await client.get_tools()
     agent = create_react_agent(model, tools)
     stale_prompt_path = os.path.join(os.path.dirname(__file__), "staleprompt.md")
     with open(stale_prompt_path) as f:
         stale_prompt = f.read()
     final_text = ""
-    async for event in agent.astream_events({"messages": stale_prompt + " Find one issue from Azure-samples azure-search-openai-demo that is potentially closeable."}, version="v2"):
+    async for event in agent.astream_events(
+        {"messages": stale_prompt + " Find one issue from Azure-samples python-ai-agent-frameworks-demos that is potentially closeable."}, version="v2", config=config):
         kind = event["event"]
         if kind == "on_chat_model_stream":
             # The event corresponding to a stream of new content (tokens or chunks of text)

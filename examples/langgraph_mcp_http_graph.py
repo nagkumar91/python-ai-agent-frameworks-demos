@@ -13,9 +13,14 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langgraph.graph import START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
+from langchain_azure_ai.callbacks.tracers import AzureOpenAITracingCallback
 
 # Setup the client to use either Azure OpenAI or GitHub Models
 load_dotenv(override=True)
+azure_tracer = AzureOpenAITracingCallback(
+    connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
+    enable_content_recording=True
+)
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "azure":
@@ -56,7 +61,8 @@ async def setup_agent():
     )
     builder.add_edge("tools", "call_model")
     graph = builder.compile()
-    hotel_response = await graph.ainvoke({"messages": "Find me a hotel in San Francisco for 2 nights starting from 2024-01-01. I need a hotel with free WiFi and a pool."})
+    config = {"callbacks": [azure_tracer]}
+    hotel_response = await graph.ainvoke({"messages": "Find me a hotel in San Francisco for 2 nights starting from 2024-01-01. I need a hotel with free WiFi and a pool."}, config=config)
     print(hotel_response["messages"][-1].content)
     image_bytes = graph.get_graph().draw_mermaid_png()
     with open("examples/images/langgraph_mcp_http_graph.png", "wb") as f:

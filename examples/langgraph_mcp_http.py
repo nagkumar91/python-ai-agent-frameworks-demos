@@ -12,9 +12,14 @@ from dotenv import load_dotenv
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langgraph.prebuilt import create_react_agent  # REACT
+from langchain_azure_ai.callbacks.tracers import AzureOpenAITracingCallback
 
 # Setup the client to use either Azure OpenAI or GitHub Models
 load_dotenv(override=True)
+azure_tracer = AzureOpenAITracingCallback(
+    connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
+    enable_content_recording=True
+)
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "azure":
@@ -42,7 +47,11 @@ async def setup_agent():
 
     tools = await client.get_tools()
     agent = create_react_agent(model, tools)
-    hotel_response = await agent.ainvoke({"messages": "Find me a hotel in San Francisco for 2 nights starting from 2024-01-01. I need a hotel with free WiFi and a pool."})
+    config = {"callbacks": [azure_tracer]}
+    hotel_response = await agent.ainvoke(
+        {"messages": "Find me a hotel in San Francisco for 2 nights starting from 2024-01-01. I need a hotel with free WiFi and a pool."},
+        config=config
+    )
     print(hotel_response["messages"][-1].content)
 
 

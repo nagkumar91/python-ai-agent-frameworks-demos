@@ -18,8 +18,18 @@ from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.runtime import get_runtime
 from rich import print
+from langchain_azure_ai.callbacks.tracers import AzureOpenAITracingCallback
+
 
 load_dotenv(override=True)
+
+azure_tracer = AzureOpenAITracingCallback(
+    connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
+    enable_content_recording=True
+)
+tracers = [
+    azure_tracer
+]
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "azure":
@@ -104,7 +114,7 @@ agent = create_agent(
 
 
 def main():
-    config = {"configurable": {"thread_id": "1"}}
+    config = {"configurable": {"thread_id": "1"}, "callbacks": [azure_tracer]}
     context = UserContext(user_id="1")
 
     r1 = agent.invoke(

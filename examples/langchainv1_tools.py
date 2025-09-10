@@ -10,12 +10,17 @@ from langchain_core.tools import tool
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from rich import print
 from rich.logging import RichHandler
+from langchain_azure_ai.callbacks.tracers import AzureOpenAITracingCallback
 
 # Setup logging with rich
 logging.basicConfig(level=logging.WARNING, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger("weekend_planner")
 
 load_dotenv(override=True)
+azure_tracer = AzureOpenAITracingCallback(
+    connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
+    enable_content_recording=True
+)
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "azure":
@@ -87,7 +92,10 @@ agent = create_agent(
 
 
 def main():
-    response = agent.invoke({"messages": [{"role": "user", "content": "hii what can I do this weekend in San Francisco?"}]})
+    response = agent.invoke(
+        {"messages": [{"role": "user", "content": "hii what can I do this weekend in San Francisco?"}]},
+        config={"callbacks": [azure_tracer]}
+    )
     latest_message = response["messages"][-1]
     print(latest_message.content)
 

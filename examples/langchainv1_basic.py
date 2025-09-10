@@ -4,9 +4,19 @@ import azure.identity
 from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
+from langchain_azure_ai.callbacks.tracers import AzureOpenAITracingCallback
 from rich import print
 
 load_dotenv(override=True)
+
+azure_tracer = AzureOpenAITracingCallback(
+    connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
+    enable_content_recording=True
+)
+tracers = [
+    azure_tracer
+]
+
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "azure":
@@ -39,7 +49,10 @@ agent = create_agent(model=model, prompt="You're an informational agent. Answer 
 
 
 def main():
-    response = agent.invoke({"messages": [{"role": "user", "content": "Whats weather today in San Francisco?"}]})
+    response = agent.invoke(
+        {"messages": [{"role": "user", "content": "Whats weather today in San Francisco?"}]},
+        config={"callbacks": [azure_tracer]}
+    )
     latest_message = response["messages"][-1]
     print(latest_message.content)
 
