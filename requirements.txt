@@ -22,3 +22,5 @@ llama-index-llms-openai-like
 llama-index-embeddings-azure-openai
 smolagents
 langchain-mcp-adapters
+agent-framework @ git+https://github.com/microsoft/agent-framework.git@main#subdirectory=python/packages/main
+agent-framework-azure @ git+https://github.com/microsoft/agent-framework.git@main#subdirectory=python/packages/azure
