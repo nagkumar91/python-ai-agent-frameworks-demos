@@ -25,7 +25,11 @@ load_dotenv(override=True)
 
 azure_tracer = AzureOpenAITracingCallback(
     connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
-    enable_content_recording=True
+    enable_content_recording=True,
+    name="Weather information agent",
+    id="weather_info_agent_771929",
+    endpoint="https://models.inference.ai.azure.com",
+    scope="Weather information"
 )
 tracers = [
     azure_tracer

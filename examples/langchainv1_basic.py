@@ -11,7 +11,11 @@ load_dotenv(override=True)
 
 azure_tracer = AzureOpenAITracingCallback(
     connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
-    enable_content_recording=True
+    enable_content_recording=True,
+    name="Basic informational agent",
+    id="basic_informational_agent_001",
+    endpoint="https://models.inference.ai.azure.com",
+    scope="General information"
 )
 tracers = [
     azure_tracer

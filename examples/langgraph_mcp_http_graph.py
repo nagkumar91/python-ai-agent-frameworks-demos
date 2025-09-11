@@ -6,6 +6,8 @@ Start the local MCP server defined in `mcp_server_basic.py` on port 8000:
 """
 
 import os
+import asyncio
+import logging
 
 import azure.identity
 from dotenv import load_dotenv
@@ -17,22 +19,56 @@ from langchain_azure_ai.callbacks.tracers import AzureOpenAITracingCallback
 
 # Setup the client to use either Azure OpenAI or GitHub Models
 load_dotenv(override=True)
+
+# Determine the actual endpoint based on API_HOST
+def get_endpoint_url():
+    api_host = os.getenv("API_HOST", "github")
+    if api_host == "azure":
+        return os.environ.get("AZURE_OPENAI_ENDPOINT", "")
+    elif api_host == "github":
+        return "https://models.inference.ai.azure.com"
+    elif api_host == "ollama":
+        return os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1")
+    else:
+        return "https://api.openai.com/v1"
+
+# Configure Azure OpenAI tracing with proper values
 azure_tracer = AzureOpenAITracingCallback(
     connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
-    enable_content_recording=True
+    enable_content_recording=os.getenv("OTEL_RECORD_CONTENT", "true").lower() == "true",
+    name="Hotel Booking Assistant",
+    id="hotel_booking_017",
+    endpoint=get_endpoint_url(),
+    scope="Travel Services"
 )
+
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "azure":
-    token_provider = azure.identity.get_bearer_token_provider(azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
+    token_provider = azure.identity.get_bearer_token_provider(
+        azure.identity.DefaultAzureCredential(), 
+        "https://cognitiveservices.azure.com/.default"
+    )
     model = AzureChatOpenAI(
-        azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-        azure_deployment=os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"],
-        openai_api_version=os.environ["AZURE_OPENAI_VERSION"],
+        azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
+        azure_deployment=os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT"),
+        openai_api_version=os.environ.get("AZURE_OPENAI_VERSION"),
         azure_ad_token_provider=token_provider,
     )
+elif API_HOST == "github":
+    model = ChatOpenAI(
+        model=os.getenv("GITHUB_MODEL", "gpt-4o"), 
+        base_url="https://models.inference.ai.azure.com", 
+        api_key=os.environ.get("GITHUB_TOKEN")
+    )
+elif API_HOST == "ollama":
+    model = ChatOpenAI(
+        model=os.environ.get("OLLAMA_MODEL", "llama3.1"),
+        base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"),
+        api_key="none"
+    )
 else:
-    model = ChatOpenAI(model=os.getenv("GITHUB_MODEL", "gpt-4o"), base_url="https://models.inference.ai.azure.com", api_key=os.environ["GITHUB_TOKEN"])
+    model = ChatOpenAI(model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
 
 
 async def setup_agent():
@@ -62,7 +98,10 @@ async def setup_agent():
     builder.add_edge("tools", "call_model")
     graph = builder.compile()
     config = {"callbacks": [azure_tracer]}
-    hotel_response = await graph.ainvoke({"messages": "Find me a hotel in San Francisco for 2 nights starting from 2024-01-01. I need a hotel with free WiFi and a pool."}, config=config)
+    hotel_response = await graph.ainvoke(
+        {"messages": "Find me a hotel in San Francisco for 2 nights starting from 2024-01-01. I need a hotel with free WiFi and a pool."}, 
+        config=config
+    )
     print(hotel_response["messages"][-1].content)
     image_bytes = graph.get_graph().draw_mermaid_png()
     with open("examples/images/langgraph_mcp_http_graph.png", "wb") as f:
@@ -70,8 +109,5 @@ async def setup_agent():
 
 
 if __name__ == "__main__":
-    import asyncio
-    import logging
-
     logging.basicConfig(level=logging.WARNING)
     asyncio.run(setup_agent())

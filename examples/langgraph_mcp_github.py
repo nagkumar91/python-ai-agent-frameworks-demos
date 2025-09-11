@@ -1,4 +1,5 @@
 import os
+import logging
 
 import azure.identity
 import rich
@@ -10,22 +11,56 @@ from langchain_azure_ai.callbacks.tracers import AzureOpenAITracingCallback
 
 # Setup the client to use either Azure OpenAI or GitHub Models
 load_dotenv(override=True)
+
+# Determine the actual endpoint based on API_HOST
+def get_endpoint_url():
+    api_host = os.getenv("API_HOST", "github")
+    if api_host == "azure":
+        return os.environ.get("AZURE_OPENAI_ENDPOINT", "")
+    elif api_host == "github":
+        return "https://models.inference.ai.azure.com"
+    elif api_host == "ollama":
+        return os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1")
+    else:
+        return "https://api.openai.com/v1"
+
+# Configure Azure OpenAI tracing with proper values
 azure_tracer = AzureOpenAITracingCallback(
     connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
-    enable_content_recording=True
+    enable_content_recording=os.getenv("OTEL_RECORD_CONTENT", "true").lower() == "true",
+    name="GitHub Issue Analyzer Agent",
+    id="github_analyzer_011",
+    endpoint=get_endpoint_url(),
+    scope="Development Tools"
 )
+
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "azure":
-    token_provider = azure.identity.get_bearer_token_provider(azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
+    token_provider = azure.identity.get_bearer_token_provider(
+        azure.identity.DefaultAzureCredential(), 
+        "https://cognitiveservices.azure.com/.default"
+    )
     model = AzureChatOpenAI(
-        azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-        azure_deployment=os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"],
-        openai_api_version=os.environ["AZURE_OPENAI_VERSION"],
+        azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
+        azure_deployment=os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT"),
+        openai_api_version=os.environ.get("AZURE_OPENAI_VERSION"),
         azure_ad_token_provider=token_provider,
     )
+elif API_HOST == "github":
+    model = ChatOpenAI(
+        model=os.getenv("GITHUB_MODEL", "gpt-4o"), 
+        base_url="https://models.inference.ai.azure.com", 
+        api_key=os.environ.get("GITHUB_TOKEN")
+    )
+elif API_HOST == "ollama":
+    model = ChatOpenAI(
+        model=os.getenv("OLLAMA_MODEL", "llama3.1"),
+        base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"),
+        api_key="none"
+    )
 else:
-    model = ChatOpenAI(model=os.getenv("GITHUB_MODEL", "gpt-4o"), base_url="https://models.inference.ai.azure.com", api_key=os.environ["GITHUB_TOKEN"])
+    model = ChatOpenAI(model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
 
 
 async def setup_agent():
@@ -48,7 +83,10 @@ async def setup_agent():
         stale_prompt = f.read()
     final_text = ""
     async for event in agent.astream_events(
-        {"messages": stale_prompt + " Find one issue from Azure-samples python-ai-agent-frameworks-demos that is potentially closeable."}, version="v2", config=config):
+        {"messages": stale_prompt + " Find one issue from Azure-samples python-ai-agent-frameworks-demos that is potentially closeable."}, 
+        version="v2", 
+        config=config
+    ):
         kind = event["event"]
         if kind == "on_chat_model_stream":
             # The event corresponding to a stream of new content (tokens or chunks of text)
@@ -73,7 +111,6 @@ async def setup_agent():
 
 if __name__ == "__main__":
     import asyncio
-    import logging
-
+    
     logging.basicConfig(level=logging.WARNING)
     asyncio.run(setup_agent())
