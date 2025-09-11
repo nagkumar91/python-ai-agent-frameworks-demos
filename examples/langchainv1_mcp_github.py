@@ -15,10 +15,11 @@ from pathlib import Path
 import azure.identity
 from dotenv import load_dotenv
 from langchain.agents import create_agent
-from langchain.agents.middleware import AgentMiddleware, AgentState, ModelRequest
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
+from pydantic import BaseModel, Field
+from rich import print
 from rich.logging import RichHandler
 
 logging.basicConfig(level=logging.WARNING, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
@@ -54,21 +55,18 @@ else:
     base_model = ChatOpenAI(model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
 
 
-class ToolCallLimitMiddleware(AgentMiddleware):
-    def __init__(self, limit) -> None:
-        super().__init__()
-        self.limit = limit
+class IssueProposal(BaseModel):
+    """Contact information for a person."""
 
-    def modify_model_request(self, request: ModelRequest, state: AgentState) -> ModelRequest:
-        tool_call_count = sum(1 for msg in state["messages"] if isinstance(msg, AIMessage) and msg.tool_calls)
-        if tool_call_count >= self.limit:
-            logger.info("Tool call limit of %d reached, disabling further tool calls.", self.limit)
-            request.tools = []
-        return request
+    url: str = Field(description="URL of the issue")
+    title: str = Field(description="Title of the issue")
+    summary: str = Field(description="Brief summary of the issue and signals for closing")
+    should_close: bool = Field(description="Whether the issue should be closed or not")
+    reply_message: str = Field(description="Message to post when closing the issue, if applicable")
 
 
 async def main():
-    client = MultiServerMCPClient(
+    mcp_client = MultiServerMCPClient(
         {
             "github": {
                 "url": "https://api.githubcopilot.com/mcp/",
@@ -78,27 +76,26 @@ async def main():
         }
     )
 
-    tools = await client.get_tools()
+    tools = await mcp_client.get_tools()
     tools = [t for t in tools if t.name in ("list_issues", "search_code", "search_issues", "search_pull_requests")]
-    agent = create_agent(base_model, tools, middleware=[ToolCallLimitMiddleware(limit=5)])
 
-    stale_prompt_path = Path(__file__).parent / "staleprompt.md"
-    with stale_prompt_path.open("r", encoding="utf-8") as f:
-        stale_prompt = f.read()
+    prompt_path = Path(__file__).parent / "triager.prompt.md"
+    with prompt_path.open("r", encoding="utf-8") as f:
+        prompt = f.read()
+    agent = create_agent(base_model, prompt=prompt, tools=tools, response_format=IssueProposal)
 
-    user_content = stale_prompt + " Find one issue from Azure-samples azure-search-openai-demo that can be closed."
-
+    user_content = "Find an issue from Azure-samples azure-search-openai-demo that can be closed."
     async for step in agent.astream({"messages": [HumanMessage(content=user_content)]}, stream_mode="updates"):
         for step_name, step_data in step.items():
             last_message = step_data["messages"][-1]
             if isinstance(last_message, AIMessage) and last_message.tool_calls:
                 tool_name = last_message.tool_calls[0]["name"]
                 tool_args = last_message.tool_calls[0]["args"]
-                logger.info(f"Calling tool '{tool_name}' with args: {tool_args}")
+                logger.info(f"Calling tool '{tool_name}' with args:\n{tool_args}")
             elif isinstance(last_message, ToolMessage):
-                logger.info(f"Got tool result: {step_data['messages'][-1].content[0:200]}...")
-            else:
-                logger.info(f"Response: {step_data['messages'][-1].content}")
+                logger.info(f"Got tool result:\n{last_message.content[0:200]}...")
+            if step_data.get("structured_response"):
+                print(step_data["structured_response"])
 
 
 if __name__ == "__main__":
