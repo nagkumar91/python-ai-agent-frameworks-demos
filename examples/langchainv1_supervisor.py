@@ -94,9 +94,9 @@ weekend_agent = create_agent(
 
 
 @tool
-def weekend_agent_tool(query: str) -> str:
-    """Invoke the activity planning agent and return its final response as plain text."""
-    logger.info("Tool:weekend_agent invoked")
+def plan_weekend(query: str) -> str:
+    """Plan a weekend based on user query and return the final response."""
+    logger.info("Tool: plan_weekend invoked")
     response = weekend_agent.invoke({"messages": [HumanMessage(content=query)]})
     final = response["messages"][-1].content
     return final
@@ -159,9 +159,9 @@ meal_agent = create_agent(
 
 
 @tool
-def meal_agent_tool(query: str) -> str:
-    """Invoke the recipe planning agent and return its final response as plain text."""
-    logger.info("Tool:meal_agent invoked")
+def plan_meal(query: str) -> str:
+    """Plan a meal based on user query and return the final response."""
+    logger.info("Tool: plan_meal invoked")
     response = meal_agent.invoke({"messages": [HumanMessage(content=query)]})
     final = response["messages"][-1].content
     return final
@@ -176,7 +176,7 @@ supervisor_agent = create_agent(
         "You are a supervisor, managing an activity planning agent and recipe planning agent."
         "Assign work to them as needed in order to answer user's question."
     ),
-    tools=[weekend_agent_tool, meal_agent_tool],
+    tools=[plan_weekend, plan_meal],
 )
 
 

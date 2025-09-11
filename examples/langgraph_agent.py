@@ -10,6 +10,33 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
 
+# Setup the client to use either Azure OpenAI or GitHub Models
+load_dotenv(override=True)
+API_HOST = os.getenv("API_HOST", "github")
+
+if API_HOST == "azure":
+    token_provider = azure.identity.get_bearer_token_provider(
+        azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+    )
+    model = AzureChatOpenAI(
+        azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
+        azure_deployment=os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"],
+        openai_api_version=os.environ["AZURE_OPENAI_VERSION"],
+        azure_ad_token_provider=token_provider,
+    )
+elif API_HOST == "github":
+    model = ChatOpenAI(
+        model=os.getenv("GITHUB_MODEL", "gpt-4o"),
+        base_url="https://models.inference.ai.azure.com",
+        api_key=os.environ["GITHUB_TOKEN"],
+    )
+elif API_HOST == "ollama":
+    model = ChatOpenAI(
+        model=os.environ["OLLAMA_MODEL"],
+        base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"),
+        api_key="none",
+    )
+
 
 @tool
 def play_song_on_spotify(song: str):
@@ -27,24 +54,6 @@ def play_song_on_apple(song: str):
 
 tools = [play_song_on_apple, play_song_on_spotify]
 tool_node = ToolNode(tools)
-
-# Setup the client to use either Azure OpenAI or GitHub Models
-load_dotenv(override=True)
-API_HOST = os.getenv("API_HOST", "github")
-
-if API_HOST == "azure":
-    token_provider = azure.identity.get_bearer_token_provider(azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
-    model = AzureChatOpenAI(
-        azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-        azure_deployment=os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"],
-        openai_api_version=os.environ["AZURE_OPENAI_VERSION"],
-        azure_ad_token_provider=token_provider,
-    )
-elif API_HOST == "github":
-    model = ChatOpenAI(model=os.getenv("GITHUB_MODEL", "gpt-4o"), base_url="https://models.inference.ai.azure.com", api_key=os.environ["GITHUB_TOKEN"])
-elif API_HOST == "ollama":
-    model = ChatOpenAI(model=os.environ["OLLAMA_MODEL"], base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"), api_key="none")
-
 model = model.bind_tools(tools, parallel_tool_calls=False)
 
 

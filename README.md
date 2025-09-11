@@ -105,10 +105,10 @@ You can run the examples in this repository by executing the scripts in the `exa
 | [langchainv1_tools.py](examples/langchainv1_tools.py) | Uses LangChain v1 to build a weekend planning agent with multiple tools. |
 | [langchainv1_supervisor.py](examples/langchainv1_supervisor.py) | Uses LangChain v1 with a supervisor orchestrating activity and recipe sub-agents. |
 | [langchainv1_quickstart.py](examples/langchainv1_quickstart.py) | Uses LangChain v1 to build an assistant with tool calling, structured output, and memory. Based off official Quickstart docs. |
+| [langchainv1_mcp_github.py](examples/langchainv1_mcp_github.py) | Uses Langchain v1 agent with GitHub MCP server to triage repository issues. |
+| [langchainv1_mcp_http.py](examples/langchainv1_mcp_github.py) | Uses Langchain v1 agent with tools from local MCP HTTP server. |
 | [langgraph_agent.py](examples/langgraph_agent.py) | Builds LangGraph graph for an agent to play songs. |
-| [langgraph_mcp_http.py](examples/langgraph_mcp_http.py) | Uses LangGraph with ReAct agent that uses tools from local MCP HTTP server. |
-| [langgraph_mcp_http_graph.py](examples/langgraph_mcp_http_graph.py) | Builds a custom LangGraph state graph using tools from local MCP HTTP server. |
-| [langgraph_mcp_github.py](examples/langgraph_mcp_github.py) | Uses a LangGraph with agent and GitHub MCP server to triage repository issues. |
+| [langgraph_mcp.py](examples/langgraph_mcp.py) | Builds Langgraph graph that uses tools from MCP HTTP server. |
 
 ### OpenAI and OpenAI-Agents
 
