@@ -46,23 +46,27 @@ if API_HOST == "azure":
         "https://cognitiveservices.azure.com/.default",
     )
     client = AsyncAzureOpenAI(
-        api_version=os.environ.get("AZURE_OPENAI_VERSION"),
-        azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
+        api_version=os.environ["AZURE_OPENAI_VERSION"],
+        azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
         azure_ad_token_provider=token_provider,
     )
     model = OpenAIChatModel(
-        os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT"),
+        os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"],
         provider=OpenAIProvider(openai_client=client),
     )
 elif API_HOST == "github":
-    client = AsyncOpenAI(api_key=os.environ.get("GITHUB_TOKEN"), base_url="https://models.inference.ai.azure.com")
-    model = OpenAIChatModel(os.getenv("GITHUB_MODEL", "gpt-4o"), provider=OpenAIProvider(openai_client=client))
+    client = AsyncOpenAI(api_key=os.environ["GITHUB_TOKEN"], base_url="https://models.inference.ai.azure.com")
+    model = OpenAIChatModel(
+        os.environ.get("GITHUB_MODEL", "gpt-4o-mini"), provider=OpenAIProvider(openai_client=client)
+    )
 elif API_HOST == "ollama":
-    client = AsyncOpenAI(base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"), api_key="none")
-    model = OpenAIChatModel(os.environ.get("OLLAMA_MODEL"), provider=OpenAIProvider(openai_client=client))
+    client = AsyncOpenAI(base_url=os.environ["OLLAMA_ENDPOINT"], api_key="none")
+    model = OpenAIChatModel(os.environ["OLLAMA_MODEL"], provider=OpenAIProvider(openai_client=client))
 else:
-    client = AsyncOpenAI()  # fallback to default OpenAI client settings
-    model = OpenAIChatModel(os.getenv("OPENAI_MODEL", "gpt-4o-mini"), provider=OpenAIProvider(openai_client=client))
+    client = AsyncOpenAI()
+    model = OpenAIChatModel(
+        os.environ.get("OPENAI_MODEL", "gpt-4o-mini"), provider=OpenAIProvider(openai_client=client)
+    )
 
 
 class IssueProposal(BaseModel):
