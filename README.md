@@ -23,9 +23,8 @@ This repository provides examples of many popular Python AI agent frameworks usi
   * [VS Code Dev Containers](#vs-code-dev-containers)
   * [Local environment](#local-environment)
 * [Running the Python examples](#running-the-python-examples)
-* [Guidance](#guidance)
-  * [Costs](#costs)
-  * [Security guidelines](#security-guidelines)
+* [Configuring GitHub Models](#configuring-github-models)
+* [Provisioning Azure AI resources](#provisioning-azure-ai-resources)
 * [Resources](#resources)
 
 ## Getting started
@@ -130,6 +129,7 @@ You can run the examples in this repository by executing the scripts in the `exa
 | [pydanticai_graph.py](examples/pydanticai_graph.py) | Uses PydanticAI with pydantic-graph to build a small question/answer evaluation graph. |
 | [pydanticai_tools.py](examples/pydanticai_tools.py) | Uses PydanticAI with multiple Python tools for weekend activity planning. |
 | [pydanticai_mcp_http.py](examples/pydanticai_mcp_http.py) | Uses PydanticAI with an MCP HTTP server toolset for travel planning (hotel search). |
+| [pydanticai_mcp_github.py](examples/pydanticai_mcp_github.py) | Uses PydanticAI with an MCP GitHub server toolset to triage repository issues. |
 
 ### Semantic Kernel
 
