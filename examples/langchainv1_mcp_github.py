@@ -77,12 +77,13 @@ async def main():
     )
 
     tools = await mcp_client.get_tools()
-    tools = [t for t in tools if t.name in ("list_issues", "search_code", "search_issues", "search_pull_requests")]
+    desired_tool_names = ("list_issues", "search_code", "search_issues", "search_pull_requests")
+    filtered_tools = [t for t in tools if t.name in desired_tool_names]
 
     prompt_path = Path(__file__).parent / "triager.prompt.md"
     with prompt_path.open("r", encoding="utf-8") as f:
         prompt = f.read()
-    agent = create_agent(base_model, prompt=prompt, tools=tools, response_format=IssueProposal)
+    agent = create_agent(base_model, prompt=prompt, tools=filtered_tools, response_format=IssueProposal)
 
     user_content = "Find an issue from Azure-samples azure-search-openai-demo that can be closed."
     async for step in agent.astream({"messages": [HumanMessage(content=user_content)]}, stream_mode="updates"):
