@@ -9,7 +9,7 @@ from langchain_core.tools import tool
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from rich import print
 from rich.logging import RichHandler
-from langchain_azure_ai.callbacks.tracers import AzureOpenAITracingCallback
+from langchain_azure_ai.callbacks.tracers import AzureAIInferenceTracer
 
 # Setup logging with rich
 logging.basicConfig(level=logging.WARNING, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
@@ -30,7 +30,7 @@ def get_endpoint_url():
         return "https://api.openai.com/v1"
 
 # Configure Azure OpenAI tracing with proper values
-azure_tracer = AzureOpenAITracingCallback(
+azure_tracer = AzureAIInferenceTracer(
     connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
     enable_content_recording=os.getenv("OTEL_RECORD_CONTENT", "true").lower() == "true",
     name="Weather Information Agent",

@@ -11,7 +11,7 @@ from langchain_core.tools import tool
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from rich import print
 from rich.logging import RichHandler
-from langchain_azure_ai.callbacks.tracers import AzureOpenAITracingCallback
+from langchain_azure_ai.callbacks.tracers import AzureAIInferenceTracer
 
 logging.basicConfig(level=logging.WARNING, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger("lang_triage")
@@ -19,7 +19,7 @@ logger = logging.getLogger("lang_triage")
 load_dotenv(override=True)
 
 # Main supervisor tracer
-supervisor_tracer = AzureOpenAITracingCallback(
+supervisor_tracer = AzureAIInferenceTracer(
     connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
     enable_content_recording=os.getenv("OTEL_RECORD_CONTENT", "true").lower() == "true",
     name="Supervisor Agent",
@@ -29,7 +29,7 @@ supervisor_tracer = AzureOpenAITracingCallback(
 )
 
 # Activity planning agent tracer
-activity_tracer = AzureOpenAITracingCallback(
+activity_tracer = AzureAIInferenceTracer(
     connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
     enable_content_recording=os.getenv("OTEL_RECORD_CONTENT", "true").lower() == "true",
     name="Weekend Activity Planner",
@@ -39,7 +39,7 @@ activity_tracer = AzureOpenAITracingCallback(
 )
 
 # Meal planning agent tracer
-meal_tracer = AzureOpenAITracingCallback(
+meal_tracer = AzureAIInferenceTracer(
     connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
     enable_content_recording=os.getenv("OTEL_RECORD_CONTENT", "true").lower() == "true",
     name="Meal Recipe Planner",

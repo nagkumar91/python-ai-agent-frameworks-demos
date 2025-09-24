@@ -15,7 +15,7 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langgraph.graph import START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
-from langchain_azure_ai.callbacks.tracers import AzureOpenAITracingCallback
+from langchain_azure_ai.callbacks.tracers import AzureAIInferenceTracer
 
 # Setup the client to use either Azure OpenAI or GitHub Models
 load_dotenv(override=True)
@@ -33,7 +33,7 @@ def get_endpoint_url():
         return "https://api.openai.com/v1"
 
 # Configure Azure OpenAI tracing with proper values
-azure_tracer = AzureOpenAITracingCallback(
+azure_tracer = AzureAIInferenceTracer(
     connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
     enable_content_recording=os.getenv("OTEL_RECORD_CONTENT", "true").lower() == "true",
     name="Hotel Booking Assistant",

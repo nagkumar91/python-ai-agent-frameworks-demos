@@ -18,12 +18,12 @@ from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.runtime import get_runtime
 from rich import print
-from langchain_azure_ai.callbacks.tracers import AzureOpenAITracingCallback
+from langchain_azure_ai.callbacks.tracers import AzureAIInferenceTracer
 
 
 load_dotenv(override=True)
 
-azure_tracer = AzureOpenAITracingCallback(
+azure_tracer = AzureAIInferenceTracer(
     connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
     enable_content_recording=True,
     name="Weather information agent",
