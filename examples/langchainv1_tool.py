@@ -9,7 +9,7 @@ from langchain_core.tools import tool
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from rich import print
 from rich.logging import RichHandler
-from langchain_azure_ai.callbacks.tracers import AzureAIInferenceTracer
+from langchain_azure_ai.callbacks.tracers import AzureAIOpenTelemetryTracer
 
 # Setup logging with rich
 logging.basicConfig(level=logging.WARNING, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
@@ -17,26 +17,12 @@ logger = logging.getLogger("weather_assistant")
 
 load_dotenv(override=True)
 
-# Determine the actual endpoint based on API_HOST
-def get_endpoint_url():
-    api_host = os.getenv("API_HOST", "github")
-    if api_host == "azure":
-        return os.environ.get("AZURE_OPENAI_ENDPOINT", "")
-    elif api_host == "github":
-        return "https://models.inference.ai.azure.com"
-    elif api_host == "ollama":
-        return os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1")
-    else:
-        return "https://api.openai.com/v1"
 
 # Configure Azure OpenAI tracing with proper values
-azure_tracer = AzureAIInferenceTracer(
+azure_tracer = AzureAIOpenTelemetryTracer(
     connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
     enable_content_recording=os.getenv("OTEL_RECORD_CONTENT", "true").lower() == "true",
     name="Weather Information Agent",
-    id="weather_agent_008",
-    endpoint=get_endpoint_url(),
-    scope="Information Services"
 )
 
 

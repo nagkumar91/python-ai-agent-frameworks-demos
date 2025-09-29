@@ -15,31 +15,18 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langgraph.graph import START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
-from langchain_azure_ai.callbacks.tracers import AzureAIInferenceTracer
+from langchain_azure_ai.callbacks.tracers import AzureAIOpenTelemetryTracer
 
 # Setup the client to use either Azure OpenAI or GitHub Models
 load_dotenv(override=True)
 
-# Determine the actual endpoint based on API_HOST
-def get_endpoint_url():
-    api_host = os.getenv("API_HOST", "github")
-    if api_host == "azure":
-        return os.environ.get("AZURE_OPENAI_ENDPOINT", "")
-    elif api_host == "github":
-        return "https://models.inference.ai.azure.com"
-    elif api_host == "ollama":
-        return os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1")
-    else:
-        return "https://api.openai.com/v1"
+
 
 # Configure Azure OpenAI tracing with proper values
-azure_tracer = AzureAIInferenceTracer(
+azure_tracer = AzureAIOpenTelemetryTracer(
     connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
     enable_content_recording=os.getenv("OTEL_RECORD_CONTENT", "true").lower() == "true",
     name="Hotel Booking Assistant",
-    id="hotel_booking_017",
-    endpoint=get_endpoint_url(),
-    scope="Travel Services"
 )
 
 API_HOST = os.getenv("API_HOST", "github")

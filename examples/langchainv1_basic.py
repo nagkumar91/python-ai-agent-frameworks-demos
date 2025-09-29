@@ -4,18 +4,15 @@ import azure.identity
 from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
-from langchain_azure_ai.callbacks.tracers import AzureAIInferenceTracer
+from langchain_azure_ai.callbacks.tracers import AzureAIOpenTelemetryTracer
 from rich import print
 
 load_dotenv(override=True)
 
-azure_tracer = AzureAIInferenceTracer(
+azure_tracer = AzureAIOpenTelemetryTracer(
     connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
     enable_content_recording=True,
     name="Basic informational agent",
-    id="basic_informational_agent_001",
-    endpoint="https://models.inference.ai.azure.com",
-    scope="General information"
 )
 tracers = [
     azure_tracer
