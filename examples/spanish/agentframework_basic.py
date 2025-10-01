@@ -34,11 +34,11 @@ else:
         api_key=os.environ.get("OPENAI_API_KEY"), model_id=os.environ.get("OPENAI_MODEL", "gpt-4o")
     )
 
-agent = client.create_agent(instructions="You're an informational agent. Answer questions cheerfully.")
+agent = client.create_agent(instructions="Eres un agente informativo. Responde a las preguntas con alegría.")
 
 
 async def main():
-    response = await agent.run("Whats weather today in San Francisco?")
+    response = await agent.run("¿Qué tiempo hace hoy en San Francisco?")
     print(response.text)
 
 

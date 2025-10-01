@@ -6,7 +6,7 @@ import random
 from datetime import datetime
 from typing import Annotated
 
-from agent_framework.azure import AzureChatClient
+from agent_framework.azure import AzureOpenAIChatClient
 from agent_framework.openai import OpenAIChatClient
 from azure.identity import DefaultAzureCredential
 from dotenv import load_dotenv
@@ -22,7 +22,7 @@ load_dotenv(override=True)
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "azure":
-    client = AzureChatClient(
+    client = AzureOpenAIChatClient(
         credential=DefaultAzureCredential(),
         deployment_name=os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT"),
         endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
@@ -30,20 +30,19 @@ if API_HOST == "azure":
     )
 elif API_HOST == "github":
     client = OpenAIChatClient(
-        base_url="https://models.inference.ai.azure.com",
+        base_url="https://models.github.ai/inference",
         api_key=os.environ["GITHUB_TOKEN"],
-        ai_model_id=os.getenv("GITHUB_MODEL", "gpt-4o"),
+        model_id=os.getenv("GITHUB_MODEL", "openai/gpt-4o"),
     )
 elif API_HOST == "ollama":
     client = OpenAIChatClient(
         base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"),
         api_key="none",
-        ai_model_id=os.environ.get("OLLAMA_MODEL", "llama3.1:latest"),
+        model_id=os.environ.get("OLLAMA_MODEL", "llama3.1:latest"),
     )
 else:
     client = OpenAIChatClient(
-        api_key=os.environ.get("OPENAI_API_KEY"),
-        ai_model_id=os.environ.get("OPENAI_MODEL", "gpt-4o"),
+        api_key=os.environ.get("OPENAI_API_KEY"), model_id=os.environ.get("OPENAI_MODEL", "gpt-4o")
     )
 
 # ----------------------------------------------------------------------------------
@@ -181,8 +180,8 @@ supervisor_agent = client.create_agent(
 
 async def main():
     user_query = "my kids want pasta for dinner"
-    result = await supervisor_agent.run(user_query)
-    print(result.text)
+    response = await supervisor_agent.run(user_query)
+    print(response.text)
 
 
 if __name__ == "__main__":
