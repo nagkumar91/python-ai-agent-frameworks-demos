@@ -13,6 +13,18 @@
     },
     "runningOnGitHub": {
       "value": "${GITHUB_ACTIONS}"
+    },
+    "gptModelName": {
+      "value": "${AZURE_GPT_MODEL_NAME}"
+    },
+    "gptModelVersion": {
+      "value": "${AZURE_GPT_MODEL_VERSION}"
+    },
+    "gptDeploymentName": {
+      "value": "${AZURE_GPT_DEPLOYMENT_NAME}"
+    },
+    "gptDeploymentCapacity": {
+      "value": "${AZURE_GPT_DEPLOYMENT_CAPACITY}"
     }
   }
 }

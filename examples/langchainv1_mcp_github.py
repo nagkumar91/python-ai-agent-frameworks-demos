@@ -34,9 +34,9 @@ if API_HOST == "azure":
         "https://cognitiveservices.azure.com/.default",
     )
     base_model = AzureChatOpenAI(
-        azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
-        azure_deployment=os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT"),
-        openai_api_version=os.environ.get("AZURE_OPENAI_VERSION"),
+        azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
+        azure_deployment=os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"],
+        openai_api_version=os.environ["AZURE_OPENAI_VERSION"],
         azure_ad_token_provider=token_provider,
     )
 elif API_HOST == "github":
@@ -71,7 +71,7 @@ async def main():
             "github": {
                 "url": "https://api.githubcopilot.com/mcp/",
                 "transport": "streamable_http",
-                "headers": {"Authorization": f"Bearer {os.getenv('GITHUB_TOKEN', '')}"},
+                "headers": {"Authorization": f"Bearer {os.environ['GITHUB_TOKEN']}"},
             }
         }
     )
@@ -85,8 +85,10 @@ async def main():
         prompt = f.read()
     agent = create_agent(base_model, prompt=prompt, tools=filtered_tools, response_format=IssueProposal)
 
-    user_content = "Find an issue from Azure-samples azure-search-openai-demo that can be closed."
-    async for step in agent.astream({"messages": [HumanMessage(content=user_content)]}, stream_mode="updates"):
+    user_content = "Find an open issue from Azure-samples azure-search-openai-demo that can be closed."
+    async for step in agent.astream(
+        {"messages": [HumanMessage(content=user_content)]}, stream_mode="updates", config={"recursion_limit": 100}
+    ):
         for step_name, step_data in step.items():
             last_message = step_data["messages"][-1]
             if isinstance(last_message, AIMessage) and last_message.tool_calls:
