@@ -1,4 +1,4 @@
-name: Provision with azd
+name: Provision Azure resources with azd
 
 on:
   workflow_dispatch:
@@ -27,6 +27,11 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
       AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+      # Project specific
+      AZURE_GPT_MODEL_NAME: ${{ vars.AZURE_GPT_MODEL_NAME }}
+      AZURE_GPT_MODEL_VERSION: ${{ vars.AZURE_GPT_MODEL_VERSION }}
+      AZURE_GPT_DEPLOYMENT_NAME: ${{ vars.AZURE_GPT_DEPLOYMENT_NAME }}
+      AZURE_GPT_DEPLOYMENT_CAPACITY: ${{ vars.AZURE_GPT_DEPLOYMENT_CAPACITY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
