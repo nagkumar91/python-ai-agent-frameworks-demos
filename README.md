@@ -23,9 +23,8 @@ This repository provides examples of many popular Python AI agent frameworks usi
   * [VS Code Dev Containers](#vs-code-dev-containers)
   * [Local environment](#local-environment)
 * [Running the Python examples](#running-the-python-examples)
-* [Guidance](#guidance)
-  * [Costs](#costs)
-  * [Security guidelines](#security-guidelines)
+* [Configuring GitHub Models](#configuring-github-models)
+* [Provisioning Azure AI resources](#provisioning-azure-ai-resources)
 * [Resources](#resources)
 
 ## Getting started
@@ -105,10 +104,10 @@ You can run the examples in this repository by executing the scripts in the `exa
 | [langchainv1_tools.py](examples/langchainv1_tools.py) | Uses LangChain v1 to build a weekend planning agent with multiple tools. |
 | [langchainv1_supervisor.py](examples/langchainv1_supervisor.py) | Uses LangChain v1 with a supervisor orchestrating activity and recipe sub-agents. |
 | [langchainv1_quickstart.py](examples/langchainv1_quickstart.py) | Uses LangChain v1 to build an assistant with tool calling, structured output, and memory. Based off official Quickstart docs. |
+| [langchainv1_mcp_github.py](examples/langchainv1_mcp_github.py) | Uses Langchain v1 agent with GitHub MCP server to triage repository issues. |
+| [langchainv1_mcp_http.py](examples/langchainv1_mcp_github.py) | Uses Langchain v1 agent with tools from local MCP HTTP server. |
 | [langgraph_agent.py](examples/langgraph_agent.py) | Builds LangGraph graph for an agent to play songs. |
-| [langgraph_mcp_http.py](examples/langgraph_mcp_http.py) | Uses LangGraph with ReAct agent that uses tools from local MCP HTTP server. |
-| [langgraph_mcp_http_graph.py](examples/langgraph_mcp_http_graph.py) | Builds a custom LangGraph state graph using tools from local MCP HTTP server. |
-| [langgraph_mcp_github.py](examples/langgraph_mcp_github.py) | Uses a LangGraph with agent and GitHub MCP server to triage repository issues. |
+| [langgraph_mcp.py](examples/langgraph_mcp.py) | Builds Langgraph graph that uses tools from MCP HTTP server. |
 
 ### OpenAI and OpenAI-Agents
 
@@ -130,6 +129,7 @@ You can run the examples in this repository by executing the scripts in the `exa
 | [pydanticai_graph.py](examples/pydanticai_graph.py) | Uses PydanticAI with pydantic-graph to build a small question/answer evaluation graph. |
 | [pydanticai_tools.py](examples/pydanticai_tools.py) | Uses PydanticAI with multiple Python tools for weekend activity planning. |
 | [pydanticai_mcp_http.py](examples/pydanticai_mcp_http.py) | Uses PydanticAI with an MCP HTTP server toolset for travel planning (hotel search). |
+| [pydanticai_mcp_github.py](examples/pydanticai_mcp_github.py) | Uses PydanticAI with an MCP GitHub server toolset to triage repository issues. |
 
 ### Semantic Kernel
 

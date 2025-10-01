@@ -19,7 +19,9 @@ load_dotenv(override=True)
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "azure":
-    token_provider = azure.identity.get_bearer_token_provider(azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
+    token_provider = azure.identity.get_bearer_token_provider(
+        azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+    )
     model = AzureChatOpenAI(
         azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
         azure_deployment=os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"],
@@ -27,7 +29,11 @@ if API_HOST == "azure":
         azure_ad_token_provider=token_provider,
     )
 else:
-    model = ChatOpenAI(model=os.getenv("GITHUB_MODEL", "gpt-4o"), base_url="https://models.inference.ai.azure.com", api_key=os.environ["GITHUB_TOKEN"])
+    model = ChatOpenAI(
+        model=os.getenv("GITHUB_MODEL", "gpt-4o"),
+        base_url="https://models.inference.ai.azure.com",
+        api_key=os.environ["GITHUB_TOKEN"],
+    )
 
 
 async def setup_agent():
@@ -56,7 +62,9 @@ async def setup_agent():
     )
     builder.add_edge("tools", "call_model")
     graph = builder.compile()
-    hotel_response = await graph.ainvoke({"messages": "Find me a hotel in San Francisco for 2 nights starting from 2024-01-01. I need a hotel with free WiFi and a pool."})
+    hotel_response = await graph.ainvoke(
+        {"messages": "Find a hotel in SF for 2 nights starting from 2024-01-01. I need free WiFi and pool."}
+    )
     print(hotel_response["messages"][-1].content)
     image_bytes = graph.get_graph().draw_mermaid_png()
     with open("examples/images/langgraph_mcp_http_graph.png", "wb") as f:
