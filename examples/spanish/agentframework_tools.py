@@ -65,7 +65,7 @@ def get_weather(
 def get_activities(
     city: Annotated[str, Field(description="La ciudad para obtener actividades.")],
     date: Annotated[str, Field(description="La fecha (YYYY-MM-DD) para obtener actividades.")],
-) -> list:
+) -> list[dict]:
     """Devuelve una lista de actividades para una ciudad y fecha dadas."""
     logger.info(f"Obteniendo actividades para {city} en {date}")
     return [

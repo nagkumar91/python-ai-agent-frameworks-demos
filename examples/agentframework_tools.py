@@ -83,7 +83,7 @@ def get_current_date() -> str:
 
 agent = client.create_agent(
     instructions=(
-        "You help users plan their weekends and choose the best activities for the given weather."
+        "You help users plan their weekends and choose the best activities for the given weather. "
         "If an activity would be unpleasant in weather, don't suggest it. Include date of the weekend in response."
     ),
     tools=[get_weather, get_activities, get_current_date],
