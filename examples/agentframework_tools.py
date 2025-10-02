@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 import os
 import random
@@ -66,16 +65,14 @@ def get_weather(
 def get_activities(
     city: Annotated[str, Field(description="The city to get activities for.")],
     date: Annotated[str, Field(description="The date to get activities for in format YYYY-MM-DD.")],
-) -> list:
+) -> list[dict]:
     """Returns a list of activities for a given city and date."""
     logger.info(f"Getting activities for {city} on {date}")
-    return json.dumps(
-        [
-            {"name": "Hiking", "location": city},
-            {"name": "Beach", "location": city},
-            {"name": "Museum", "location": city},
-        ]
-    )
+    return [
+        {"name": "Hiking", "location": city},
+        {"name": "Beach", "location": city},
+        {"name": "Museum", "location": city},
+    ]
 
 
 def get_current_date() -> str:

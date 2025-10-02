@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 import os
 import random
@@ -69,13 +68,11 @@ def get_activities(
 ) -> list:
     """Devuelve una lista de actividades para una ciudad y fecha dadas."""
     logger.info(f"Obteniendo actividades para {city} en {date}")
-    return json.dumps(
-        [
-            {"name": "Senderismo", "location": city},
-            {"name": "Playa", "location": city},
-            {"name": "Museo", "location": city},
-        ]
-    )
+    return [
+        {"name": "Senderismo", "location": city},
+        {"name": "Playa", "location": city},
+        {"name": "Museo", "location": city},
+    ]
 
 
 def get_current_date() -> str:

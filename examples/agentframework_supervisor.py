@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 import os
 import random
@@ -65,16 +64,14 @@ def get_weather(
 def get_activities(
     city: Annotated[str, Field(description="The city to get activities for.")],
     date: Annotated[str, Field(description="The date to get activities for in format YYYY-MM-DD.")],
-) -> str:
+) -> list[dict]:
     """Returns a list of activities for a given city and date."""
     logger.info(f"Getting activities for {city} on {date}")
-    return json.dumps(
-        [
-            {"name": "Hiking", "location": city},
-            {"name": "Beach", "location": city},
-            {"name": "Museum", "location": city},
-        ]
-    )
+    return [
+        {"name": "Hiking", "location": city},
+        {"name": "Beach", "location": city},
+        {"name": "Museum", "location": city},
+    ]
 
 
 def get_current_date() -> str:
@@ -107,7 +104,7 @@ async def plan_weekend(query: str) -> str:
 
 def find_recipes(
     query: Annotated[str, Field(description="User query or desired meal/ingredient")],
-) -> str:
+) -> list[dict]:
     """Returns recipes (JSON) based on a query."""
     logger.info(f"Finding recipes for '{query}'")
     if "pasta" in query.lower():
@@ -134,17 +131,17 @@ def find_recipes(
                 "steps": ["Butter bread.", "Place cheese between slices.", "Grill until golden brown."],
             }
         ]
-    return json.dumps(recipes)
+    return recipes
 
 
-def check_fridge() -> str:
+def check_fridge() -> list[str]:
     """Returns a JSON list of ingredients currently in the fridge."""
     logger.info("Checking fridge for current ingredients")
     if random.random() < 0.5:
         items = ["pasta", "tomato sauce", "bell peppers", "olive oil"]
     else:
         items = ["tofu", "soy sauce", "broccoli", "carrots"]
-    return json.dumps(items)
+    return items
 
 
 meal_agent = client.create_agent(
