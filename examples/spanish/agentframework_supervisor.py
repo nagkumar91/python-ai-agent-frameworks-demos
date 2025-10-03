@@ -65,7 +65,7 @@ def get_activities(
     city: Annotated[str, Field(description="Ciudad para obtener actividades.")],
     date: Annotated[str, Field(description="Fecha (YYYY-MM-DD) para obtener actividades.")],
 ) -> list[dict]:
-    """Devuelve una lista de actividades para una ciudad y fecha dadas."""
+    """Devuelve una lista de actividades para la ciudad y la fecha indicadas."""
     logger.info(f"Obteniendo actividades para {city} en {date}")
     return [
         {"name": "Senderismo", "location": city},

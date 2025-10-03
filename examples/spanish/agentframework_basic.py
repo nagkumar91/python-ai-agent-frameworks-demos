@@ -38,7 +38,7 @@ agent = client.create_agent(instructions="Eres un agente informativo. Responde a
 
 
 async def main():
-    response = await agent.run("¿Qué tiempo hace hoy en San Francisco?")
+    response = await agent.run("¿Qué clima hace hoy en San Francisco?")
     print(response.text)
 
 
