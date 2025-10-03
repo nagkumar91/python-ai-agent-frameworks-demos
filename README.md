@@ -86,14 +86,14 @@ A related option is VS Code Dev Containers, which will open the project in your 
 
 You can run the examples in this repository by executing the scripts in the `examples` directory. Each script demonstrates a different AI agent pattern or framework.
 
-### Autogen
+### Microsoft Agent Framework
 
 | Example | Description |
 | ------- | ----------- |
-| [autogen_basic.py](examples/autogen_basic.py) | Uses AutoGen to build a single agent. |
-| [autogen_tools.py](examples/autogen_tools.py) | Uses AutoGen to build a single agent with tools. |
-| [autogen_magenticone.py](examples/autogen_magenticone.py) | Uses AutoGen with the MagenticOne orchestrator agent for travel planning. |
-| [autogen_swarm.py](examples/autogen_swarm.py) | Uses AutoGen with the Swarm orchestrator agent for flight refunding requests. |
+| [agentframework_basic.py](examples/agentframework_basic.py) | Uses Agent Framework to build a basic informational agent. |
+| [agentframework_tool.py](examples/agentframework_tool.py) | Uses Agent Framework to build an agent with a single weather tool. |
+| [agentframework_tools.py](examples/agentframework_tools.py) | Uses Agent Framework to build a weekend planning agent with multiple tools. |
+| [agentframework_supervisor.py](examples/agentframework_supervisor.py) | Uses Agent Framework with a supervisor orchestrating activity and recipe sub-agents. |
 
 ### Langchain v1 and LangGraph
 
@@ -130,14 +130,6 @@ You can run the examples in this repository by executing the scripts in the `exa
 | [pydanticai_tools.py](examples/pydanticai_tools.py) | Uses PydanticAI with multiple Python tools for weekend activity planning. |
 | [pydanticai_mcp_http.py](examples/pydanticai_mcp_http.py) | Uses PydanticAI with an MCP HTTP server toolset for travel planning (hotel search). |
 | [pydanticai_mcp_github.py](examples/pydanticai_mcp_github.py) | Uses PydanticAI with an MCP GitHub server toolset to triage repository issues. |
-
-### Semantic Kernel
-
-| Example | Description |
-| ------- | ----------- |
-| [semantickernel_basic.py](examples/semantickernel_basic.py) | Uses Semantic Kernel to build a simple agent that teaches Spanish. |
-| [semantickernel_groupchat.py](examples/semantickernel_groupchat.py) | Uses Semantic Kernel to build a writer/editor two-agent workflow. |
-| [semantickernel_mcp_http.py](examples/semantickernel_mcp_http.py) | Uses Semantic Kernel agent with tools from a local MCP HTTP server for hotel search. |
 
 ### Other frameworks
 
