@@ -9,34 +9,47 @@ from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
+from langchain_azure_ai.callbacks.tracers import AzureAIOpenTelemetryTracer
 
-# Setup the client to use either Azure OpenAI or GitHub Models
 load_dotenv(override=True)
+
+
+# Configure Azure OpenAI tracing with proper values
+azure_tracer = AzureAIOpenTelemetryTracer(
+    connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
+    enable_content_recording=os.getenv("OTEL_RECORD_CONTENT", "true").lower() == "true",
+    name="Music Player Agent",
+)
+
+
+# Setup the client to use Azure OpenAI, GitHub Models, or Ollama
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "azure":
     token_provider = azure.identity.get_bearer_token_provider(
-        azure.identity.DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+        azure.identity.DefaultAzureCredential(),
+        "https://cognitiveservices.azure.com/.default",
     )
     model = AzureChatOpenAI(
-        azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-        azure_deployment=os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"],
-        openai_api_version=os.environ["AZURE_OPENAI_VERSION"],
+        azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
+        azure_deployment=os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT"),
+        openai_api_version=os.environ.get("AZURE_OPENAI_VERSION"),
         azure_ad_token_provider=token_provider,
     )
 elif API_HOST == "github":
     model = ChatOpenAI(
         model=os.getenv("GITHUB_MODEL", "gpt-4o"),
         base_url="https://models.inference.ai.azure.com",
-        api_key=os.environ["GITHUB_TOKEN"],
+        api_key=os.environ.get("GITHUB_TOKEN"),
     )
 elif API_HOST == "ollama":
     model = ChatOpenAI(
-        model=os.environ["OLLAMA_MODEL"],
+        model=os.getenv("OLLAMA_MODEL", "llama3.1"),
         base_url=os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/v1"),
         api_key="none",
     )
-
+else:
+    model = ChatOpenAI(model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
 
 @tool
 def play_song_on_spotify(song: str):
@@ -124,7 +137,7 @@ memory = MemorySaver()
 # This will add a breakpoint before the `action` node is called
 app = workflow.compile(checkpointer=memory)
 
-config = {"configurable": {"thread_id": "1"}}
+config = {"configurable": {"thread_id": "1"}, "callbacks": [azure_tracer]}
 input_message = HumanMessage(content="Can you play Taylor Swift's most popular song?")
 for event in app.stream({"messages": [input_message]}, config, stream_mode="values"):
     event["messages"][-1].pretty_print()

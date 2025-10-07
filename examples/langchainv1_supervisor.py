@@ -11,11 +11,33 @@ from langchain_core.tools import tool
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from rich import print
 from rich.logging import RichHandler
+from langchain_azure_ai.callbacks.tracers import AzureAIOpenTelemetryTracer
 
 logging.basicConfig(level=logging.WARNING, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger("lang_triage")
 
 load_dotenv(override=True)
+
+# Main supervisor tracer
+supervisor_tracer = AzureAIOpenTelemetryTracer(
+    connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
+    enable_content_recording=os.getenv("OTEL_RECORD_CONTENT", "true").lower() == "true",
+    name="Supervisor Agent",
+)
+
+# Activity planning agent tracer
+activity_tracer = AzureAIOpenTelemetryTracer(
+    connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
+    enable_content_recording=os.getenv("OTEL_RECORD_CONTENT", "true").lower() == "true",
+    name="Weekend Activity Planner",
+)
+
+# Meal planning agent tracer
+meal_tracer = AzureAIOpenTelemetryTracer(
+    connection_string=os.environ.get("APPLICATION_INSIGHTS_CONNECTION_STRING"),
+    enable_content_recording=os.getenv("OTEL_RECORD_CONTENT", "true").lower() == "true",
+    name="Meal Recipe Planner",
+)
 API_HOST = os.getenv("API_HOST", "github")
 
 if API_HOST == "azure":
@@ -97,7 +119,10 @@ weekend_agent = create_agent(
 def plan_weekend(query: str) -> str:
     """Plan a weekend based on user query and return the final response."""
     logger.info("Tool: plan_weekend invoked")
-    response = weekend_agent.invoke({"messages": [HumanMessage(content=query)]})
+    response = weekend_agent.invoke(
+        {"messages": [HumanMessage(content=query)]},
+        config={"callbacks": [activity_tracer]},
+    )
     final = response["messages"][-1].content
     return final
 
@@ -162,7 +187,10 @@ meal_agent = create_agent(
 def plan_meal(query: str) -> str:
     """Plan a meal based on user query and return the final response."""
     logger.info("Tool: plan_meal invoked")
-    response = meal_agent.invoke({"messages": [HumanMessage(content=query)]})
+    response = meal_agent.invoke(
+        {"messages": [HumanMessage(content=query)]},
+        config={"callbacks": [meal_tracer]},
+    )
     final = response["messages"][-1].content
     return final
 
@@ -181,7 +209,10 @@ supervisor_agent = create_agent(
 
 
 def main():
-    response = supervisor_agent.invoke({"messages": [{"role": "user", "content": "my kids want pasta for dinner"}]})
+    response = supervisor_agent.invoke(
+        {"messages": [{"role": "user", "content": "my kids want pasta for dinner, give me weekend plans"}]},
+        config={"callbacks": [supervisor_tracer]}
+    )
     latest_message = response["messages"][-1]
     print(latest_message.content)
 
